@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FAFAFA">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- Status Card -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/status_card"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="12dp"
+            android:layout_marginBottom="16dp"
+            app:cardElevation="4dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="20dp">
+
+                <TextView
+                    android:id="@+id/status_message"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Ready to send SMS"
+                    android:textSize="18sp"
+                    android:textColor="#333333"
+                    android:textStyle="bold"
+                    android:gravity="center"/>
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <TextView
+            android:id="@+id/tv_fetch_number"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Number: "
+            android:textSize="16sp"
+            android:textColor="#333333"
+            android:layout_marginBottom="4dp"/>
+
+        <TextView
+            android:id="@+id/tv_fetch_message"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Content: "
+            android:textSize="16sp"
+            android:textColor="#333333"
+            android:layout_marginBottom="12dp"/>
+
+        <!-- Progress Bar for Sending -->
+        <ProgressBar
+            android:id="@+id/sending_progress"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="10dp"
+            android:visibility="gone"
+            android:layout_marginBottom="12dp"
+            android:progressTint="#4CAF50"/>
+
+        <Button
+            android:id="@+id/btn_fetch_next"
+            android:layout_width="match_parent"
+            android:layout_height="45dp"
+            android:text="Fetch Next"
+            android:backgroundTint="#009688"
+            android:textColor="#FFF"
+            android:layout_marginBottom="8dp"/>
+
+        <Button
+            android:id="@+id/btn_send_single"
+            android:layout_width="match_parent"
+            android:layout_height="45dp"
+            android:text="Send SMS"
+            android:backgroundTint="#4CAF50"
+            android:textColor="#FFF"
+            android:layout_marginBottom="16dp"
+            android:enabled="true"/>
+
+        <!-- Help & Hint Message -->
+        <TextView
+            android:id="@+id/fail_hint"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:textColor="#F44336"
+            android:visibility="gone"
+            android:textSize="14sp"
+            android:gravity="center"/>
+
+        <Button
+            android:id="@+id/btn_view_logs"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:text="View Logs"
+            android:textColor="#FFFFFF"
+            android:backgroundTint="#666666"
+            android:layout_marginTop="18dp" />
+    </LinearLayout>
+</ScrollView>

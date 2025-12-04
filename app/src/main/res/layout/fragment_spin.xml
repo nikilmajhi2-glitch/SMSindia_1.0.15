@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#263238"
+    android:gravity="center_horizontal"
+    android:padding="20dp">
+
+    <!-- Header: Token Count -->
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:cardCornerRadius="25dp"
+        app:cardBackgroundColor="#37474F"
+        app:strokeColor="#FFC107"
+        app:strokeWidth="2dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginHorizontal="20dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:padding="12dp">
+
+            <ImageView
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:src="@drawable/ic_spin"
+                app:tint="#FFC107"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Available Spins: "
+                android:textColor="#FFFFFF"
+                android:textSize="18sp"
+                android:layout_marginStart="10dp"/>
+
+            <TextView
+                android:id="@+id/tv_spin_tokens"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0"
+                android:textColor="#FFC107"
+                android:textStyle="bold"
+                android:textSize="24sp"
+                android:layout_marginStart="5dp"/>
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Spin &amp; Win Cash!"
+        android:textColor="#FFFFFF"
+        android:textSize="28sp"
+        android:textStyle="bold"
+        android:layout_marginTop="30dp"/>
+
+    <!-- Wheel Container -->
+    <FrameLayout
+        android:layout_width="320dp"
+        android:layout_height="320dp"
+        android:layout_marginTop="40dp">
+
+        <!-- Custom Wheel View -->
+        <com.smsindia.app.ui.LuckyWheelView
+            android:id="@+id/wheel_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+
+        <!-- Center Indicator / Button -->
+        <ImageView
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:src="@drawable/ic_spin" 
+            android:background="@drawable/bg_circle_edit"
+            app:tint="#FFFFFF"
+            android:layout_gravity="center"/>
+            
+        <!-- The Stopper Arrow (Pointing Left) -->
+         <ImageView
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:src="@android:drawable/arrow_down_float"
+            android:rotation="270"
+            app:tint="#FFFFFF"
+            android:layout_gravity="center_vertical|end"/>
+
+    </FrameLayout>
+
+    <Button
+        android:id="@+id/btn_spin_now"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:text="SPIN NOW"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:layout_marginTop="50dp"
+        android:layout_marginHorizontal="20dp"
+        android:backgroundTint="#FFC107"
+        android:textColor="#000000"
+        app:cornerRadius="30dp"/>
+
+</LinearLayout>

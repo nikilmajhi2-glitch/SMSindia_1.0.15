@@ -9,21 +9,21 @@
 
     <TextView
         android:text="🔒 SMSIndia Secure Login"
-        android:textSize="20sp"
+        android:textSize="22sp"
         android:textStyle="bold"
         android:textColor="#FF6F00"
-        android:layout_marginBottom="24dp"
+        android:layout_marginBottom="30dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
 
     <EditText
         android:id="@+id/phoneInput"
-        android:hint="Mobile number"
+        android:hint="Mobile Number"
         android:inputType="phone"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:backgroundTint="#FF6F00"
-        android:layout_marginBottom="12dp" />
+        android:layout_marginBottom="16dp" />
 
     <EditText
         android:id="@+id/passwordInput"
@@ -32,31 +32,43 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:backgroundTint="#FF6F00"
-        android:layout_marginBottom="20dp" />
+        android:layout_marginBottom="16dp" />
+
+    <!-- ✅ ADDED: Referral Code Input -->
+    <EditText
+        android:id="@+id/referInput"
+        android:hint="Referral Code (Optional)"
+        android:inputType="phone"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:backgroundTint="#FFA040"
+        android:layout_marginBottom="24dp" />
 
     <Button
         android:id="@+id/loginBtn"
         android:text="Login"
+        android:textStyle="bold"
         android:backgroundTint="#FF6F00"
         android:textColor="@android:color/white"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="55dp" />
 
     <Button
         android:id="@+id/signupBtn"
-        android:text="Sign Up"
+        android:text="Register New Account"
+        android:textStyle="bold"
         android:backgroundTint="#FFA040"
         android:textColor="@android:color/white"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp" />
+        android:layout_height="55dp"
+        android:layout_marginTop="12dp" />
 
     <TextView
         android:id="@+id/deviceIdText"
         android:text="Device ID: ..."
-        android:textSize="14sp"
+        android:textSize="12sp"
         android:textColor="#888"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="30dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
 </LinearLayout>

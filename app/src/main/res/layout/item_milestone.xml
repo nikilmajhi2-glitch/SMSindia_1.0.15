@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="10dp"
+    app:cardCornerRadius="8dp"
+    app:cardElevation="2dp"
+    app:cardBackgroundColor="#FFFFFF">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:padding="16dp">
+
+        <!-- Icon -->
+        <ImageView
+            android:id="@+id/img_milestone_icon"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@drawable/ic_task"
+            app:tint="#FFC107"
+            android:background="@drawable/bg_circle_edit"
+            android:padding="8dp"/>
+
+        <!-- Text Info -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:layout_marginStart="16dp">
+
+            <TextView
+                android:id="@+id/tv_milestone_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Send First 20 SMS"
+                android:textStyle="bold"
+                android:textColor="#000000"
+                android:textSize="16sp"/>
+
+            <TextView
+                android:id="@+id/tv_milestone_desc"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Reward: 1 Spin Coin"
+                android:textColor="#4CAF50"
+                android:textSize="14sp"/>
+            
+            <ProgressBar
+                android:id="@+id/progress_milestone"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:max="100"
+                android:progress="50"/>
+        </LinearLayout>
+
+        <!-- Claim Button -->
+        <Button
+            android:id="@+id/btn_claim_milestone"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:text="CLAIM"
+            android:textSize="12sp"
+            android:backgroundTint="#6200EE"
+            android:layout_marginStart="8dp"
+            app:cornerRadius="20dp"/>
+
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>

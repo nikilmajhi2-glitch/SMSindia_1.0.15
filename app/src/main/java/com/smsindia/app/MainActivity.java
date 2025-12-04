@@ -14,19 +14,22 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.smsindia.app.ui.ProfileFragment;
-import com.smsindia.app.ui.TaskFragment;
 import com.smsindia.app.ui.HomeFragment;
+import com.smsindia.app.ui.ProfileFragment;
+import com.smsindia.app.ui.ShareFragment; // ✅ Added
+import com.smsindia.app.ui.SpinFragment;  // ✅ Added
+import com.smsindia.app.ui.TaskFragment;
 
 public class MainActivity extends AppCompatActivity {
 
     private BottomNavigationView navView;
 
+    // Permission Launchers
     private final ActivityResultLauncher<String> smsPermissionLauncher =
             registerForActivityResult(new ActivityResultContracts.RequestPermission(),
                     granted -> {
                         if (!granted) {
-                            Toast.makeText(this, "SMS permission denied", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(this, "SMS permission denied. Tasks may not work.", Toast.LENGTH_SHORT).show();
                         }
                     });
 
@@ -34,7 +37,7 @@ public class MainActivity extends AppCompatActivity {
             registerForActivityResult(new ActivityResultContracts.RequestPermission(),
                     granted -> {
                         if (!granted) {
-                            Toast.makeText(this, "Phone permission denied", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(this, "Phone permission denied.", Toast.LENGTH_SHORT).show();
                         }
                     });
 
@@ -44,44 +47,55 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         navView = findViewById(R.id.bottomNavigationView);
 
+        // Check Login Status
         SharedPreferences prefs = getSharedPreferences("SMSINDIA_USER", MODE_PRIVATE);
         String mobile = prefs.getString("mobile", null);
-        String deviceId = prefs.getString("deviceId", null);
-
-        if (mobile == null || deviceId == null) {
+        
+        if (mobile == null) {
             Toast.makeText(this, "Please sign in first", Toast.LENGTH_SHORT).show();
             startActivity(new Intent(this, LoginActivity.class));
             finish();
             return;
         }
 
-        loadFragment(new HomeFragment());
+        // Load default fragment (Home)
+        if (savedInstanceState == null) {
+            loadFragment(new HomeFragment());
+        }
 
+        // ✅ UPDATED NAVIGATION LOGIC
         navView.setOnItemSelectedListener(item -> {
             int id = item.getItemId();
+            Fragment selectedFragment = null;
 
-            if (id == R.id.nav_home) {
-                loadFragment(new HomeFragment());
-            } else if (id == R.id.nav_tasks) {
-                loadFragment(new TaskFragment());
-            } else if (id == R.id.nav_profile) {
-                loadFragment(new ProfileFragment());
+            if (id == R.id.navigation_home) {
+                selectedFragment = new HomeFragment();
+            } else if (id == R.id.navigation_spin) {
+                selectedFragment = new SpinFragment();
+            } else if (id == R.id.navigation_tasks) {
+                selectedFragment = new TaskFragment();
+            } else if (id == R.id.navigation_share) {
+                selectedFragment = new ShareFragment();
+            } else if (id == R.id.navigation_profile) {
+                selectedFragment = new ProfileFragment();
             }
 
-            return true;
+            if (selectedFragment != null) {
+                loadFragment(selectedFragment);
+                return true;
+            }
+            return false;
         });
+        
+        // Request necessary permissions on startup
+        checkPermissions();
     }
 
-    @SuppressWarnings("unused")
-    private void requestSmsPermission() {
+    private void checkPermissions() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.SEND_SMS)
                 != PackageManager.PERMISSION_GRANTED) {
             smsPermissionLauncher.launch(Manifest.permission.SEND_SMS);
         }
-    }
-
-    @SuppressWarnings("unused")
-    private void requestPhoneStatePermission() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE)
                 != PackageManager.PERMISSION_GRANTED) {
             phonePermissionLauncher.launch(Manifest.permission.READ_PHONE_STATE);

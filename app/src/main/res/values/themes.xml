@@ -10,5 +10,10 @@
     <style name="Theme.SMSIndia.NoActionBar" parent="Theme.SMSIndia">
         <item name="windowActionBar">false</item>
         <item name="android:windowNoTitle">true</item>
+        <style name="CircleImageView">
+    <item name="cornerFamily">rounded</item>
+    <item name="cornerSize">50%</item>
+</style>
+
     </style>
 </resources>

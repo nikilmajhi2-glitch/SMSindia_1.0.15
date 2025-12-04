@@ -51,17 +51,23 @@
             </intent-filter>
         </activity>
 
-        <!-- DELIVERY LOGS -->
+        <!-- UI ACTIVITIES -->
         <activity
             android:name=".ui.DeliveryLogActivity"
             android:exported="false"
             android:label="Delivery Logs" />
 
-        <!-- ✅ ADDED: WALLET HISTORY ACTIVITY -->
         <activity
             android:name=".ui.HistoryActivity"
             android:exported="false"
             android:label="Wallet History"
+            android:parentActivityName=".MainActivity" />
+
+        <!-- ✅ ADDED: WITHDRAWAL HISTORY ACTIVITY -->
+        <activity
+            android:name=".ui.WithdrawalHistoryActivity"
+            android:exported="false"
+            android:label="Withdrawals"
             android:parentActivityName=".MainActivity" />
 
         <!-- FIREBASE MESSAGING -->

@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
@@ -192,7 +193,8 @@ public class TaskFragment extends Fragment {
         }
         isRunning = true;
         btnAction.setText("STOP TASK");
-        btnAction.setBackgroundTintList(requireContext().getColorStateList(R.color.design_default_color_error)); // Red
+        // ✅ FIXED COLOR HERE
+        btnAction.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#D32F2F"))); // Red
         
         log("Process Started...");
         fetchAndSend();
@@ -207,7 +209,8 @@ public class TaskFragment extends Fragment {
         tvStatus.setText("Idle: " + reason);
         
         btnAction.setText(isAutoMode ? "START AUTO LOOP" : "SEND SINGLE TASK");
-        btnAction.setBackgroundTintList(requireContext().getColorStateList(R.color.design_default_color_primary)); // Purple/Blue
+        // ✅ FIXED COLOR HERE
+        btnAction.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#6200EE"))); // Purple
         log("Process Stopped: " + reason);
     }
 

@@ -61,7 +61,7 @@
                     <ImageView
                         android:layout_width="24dp"
                         android:layout_height="24dp"
-                        android:src="@drawable/ic_launcher_foreground"
+                        android:src="@drawable/ic_sim_card"
                         app:tint="#6200EE"/>
                     <TextView
                         android:id="@+id/tv_sim1_name"
@@ -98,7 +98,7 @@
                     <ImageView
                         android:layout_width="24dp"
                         android:layout_height="24dp"
-                        android:src="@drawable/ic_launcher_foreground"
+                        android:src="@drawable/ic_sim_card"
                         app:tint="#757575"/>
                     <TextView
                         android:id="@+id/tv_sim2_name"
@@ -232,14 +232,13 @@
             android:layout_width="match_parent"
             android:layout_height="150dp"
             android:layout_marginTop="8dp"
-            android:background="@drawable/bg_terminal"> <!-- We will create this drawable or just use color -->
+            android:background="@drawable/bg_terminal"> 
             
             <TextView
                 android:id="@+id/tv_logs"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:padding="12dp"
-                android:background="#212121"
                 android:text="> System initialized..."
                 android:textColor="#00E676"
                 android:fontFamily="monospace"

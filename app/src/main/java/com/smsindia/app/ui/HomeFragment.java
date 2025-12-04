@@ -24,7 +24,6 @@ import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.WriteBatch;
 import com.smsindia.app.R;
-import com.smsindia.app.adapters.BannerAdapter; // Make sure you have this adapter
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Base Theme -->
     <style name="Theme.SMSIndia" parent="Theme.Material3.DayNight.NoActionBar">
         <item name="colorPrimary">@color/md_theme_primary</item>
         <item name="android:statusBarColor">@color/md_theme_primary</item>
@@ -7,13 +8,16 @@
         <item name="materialButtonStyle">@style/Widget.MaterialComponents.Button</item>
     </style>
 
+    <!-- No Action Bar Variant -->
     <style name="Theme.SMSIndia.NoActionBar" parent="Theme.SMSIndia">
         <item name="windowActionBar">false</item>
         <item name="android:windowNoTitle">true</item>
-        <style name="CircleImageView">
-    <item name="cornerFamily">rounded</item>
-    <item name="cornerSize">50%</item>
-</style>
-
     </style>
+
+    <!-- ✅ CORRECT: This style must be outside, as a direct child of <resources> -->
+    <style name="CircleImageView">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">50%</item>
+    </style>
+
 </resources>

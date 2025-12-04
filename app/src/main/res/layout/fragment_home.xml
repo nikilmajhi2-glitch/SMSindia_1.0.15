@@ -47,7 +47,8 @@
             <ImageView
                 android:layout_width="40dp"
                 android:layout_height="40dp"
-                android:src="@mipmap/ic_launcher"
+                android:src="@android:drawable/sym_def_app_icon"
+
                 app:tint="#6200EE"
                 android:background="@android:color/white"
                 android:padding="5dp"/>

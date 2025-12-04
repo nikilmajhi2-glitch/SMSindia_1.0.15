@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.ColorStateList; // Added Import
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -175,7 +176,7 @@ public class ProfileFragment extends Fragment {
                 .addOnSuccessListener(a -> Toast.makeText(getContext(), "Bank details saved!", Toast.LENGTH_SHORT).show());
     }
 
-    // --- UPDATED WITHDRAWAL LOGIC START ---
+    // --- WITHDRAWAL LOGIC START ---
 
     private void requestWithdrawal() {
         if (!hasBankDetails) {
@@ -212,7 +213,9 @@ public class ProfileFragment extends Fragment {
                 selectedAmount = amount;
                 btnConfirm.setEnabled(true);
                 btnConfirm.setText("Withdraw ₹" + amount);
-                btnConfirm.setBackgroundTintList(getContext().getColorStateList(R.color.design_default_color_primary)); // Or specific color
+                
+                // ✅ FIXED LINE BELOW: Use Color.parseColor directly
+                btnConfirm.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#4CAF50")));
 
                 // Reset all boxes visual state
                 for (int i = 0; i < gridLayout.getChildCount(); i++) {

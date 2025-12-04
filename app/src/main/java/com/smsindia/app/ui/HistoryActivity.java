@@ -1,13 +1,16 @@
 package com.smsindia.app.ui;
 
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.google.firebase.Timestamp;
@@ -31,6 +34,10 @@ public class HistoryActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_history);
+
+        // Header Back Button
+        ImageView btnBack = findViewById(R.id.btn_back);
+        btnBack.setOnClickListener(v -> finish());
 
         recyclerView = findViewById(R.id.recycler_history);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -58,13 +65,15 @@ public class HistoryActivity extends AppCompatActivity {
                         Double amount = doc.getDouble("amount");
                         String type = doc.getString("type");
                         Timestamp ts = doc.getTimestamp("timestamp");
+                        
+                        if (title == null) title = "Unknown Transaction";
+                        if (amount == null) amount = 0.0;
+                        
                         list.add(new TransactionModel(title, amount, type, ts));
                     }
                     adapter.notifyDataSetChanged();
                 });
     }
-
-    // --- Inner Classes for Simplicity ---
 
     public static class TransactionModel {
         String title, type;
@@ -94,19 +103,25 @@ public class HistoryActivity extends AppCompatActivity {
             TransactionModel model = mList.get(position);
             holder.title.setText(model.title);
             
-            // Format Date
             if(model.timestamp != null) {
-                SimpleDateFormat sdf = new SimpleDateFormat("dd MMM yyyy, hh:mm a", Locale.getDefault());
+                SimpleDateFormat sdf = new SimpleDateFormat("dd MMM, hh:mm a", Locale.getDefault());
                 holder.date.setText(sdf.format(model.timestamp.toDate()));
             }
 
             // Format Amount and Color
             if ("DEBIT".equals(model.type)) {
                 holder.amount.setText("- ₹" + model.amount);
-                holder.amount.setTextColor(android.graphics.Color.RED);
+                holder.amount.setTextColor(Color.RED);
+                holder.icon.setImageResource(android.R.drawable.arrow_up_float); // Arrow Up (Sent)
+                holder.icon.setColorFilter(Color.RED);
+                holder.iconBg.setBackgroundResource(R.drawable.bg_circle_red_light); // Need to create
             } else {
                 holder.amount.setText("+ ₹" + model.amount);
-                holder.amount.setTextColor(android.graphics.Color.parseColor("#4CAF50")); // Green
+                // Use success green
+                holder.amount.setTextColor(Color.parseColor("#00C853")); 
+                holder.icon.setImageResource(android.R.drawable.arrow_down_float); // Arrow Down (Received)
+                holder.icon.setColorFilter(Color.parseColor("#00C853"));
+                holder.iconBg.setBackgroundResource(R.drawable.bg_circle_green_light); // Need to create
             }
         }
 
@@ -115,11 +130,16 @@ public class HistoryActivity extends AppCompatActivity {
 
         class ViewHolder extends RecyclerView.ViewHolder {
             TextView title, date, amount;
+            ImageView icon;
+            View iconBg;
+            
             ViewHolder(View v) {
                 super(v);
                 title = v.findViewById(R.id.tv_tx_title);
                 date = v.findViewById(R.id.tv_tx_date);
                 amount = v.findViewById(R.id.tv_tx_amount);
+                icon = v.findViewById(R.id.img_tx_icon);
+                iconBg = v.findViewById(R.id.layout_icon_bg);
             }
         }
     }

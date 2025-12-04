@@ -4,18 +4,17 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#263238"
+    android:background="@color/gray_bg"
     android:gravity="center_horizontal"
     android:padding="20dp">
 
-    <!-- Header: Token Count -->
+    <!-- Header: Token Count (Royal Blue) -->
     <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:cardCornerRadius="25dp"
-        app:cardBackgroundColor="#37474F"
-        app:strokeColor="#FFC107"
-        app:strokeWidth="2dp"
+        app:cardBackgroundColor="@color/app_primary"
+        app:cardElevation="6dp"
         android:layout_marginTop="20dp"
         android:layout_marginHorizontal="20dp">
 
@@ -24,12 +23,13 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="center"
-            android:padding="12dp">
+            android:padding="16dp">
 
+            <!-- Gold Icon -->
             <ImageView
                 android:layout_width="32dp"
                 android:layout_height="32dp"
-                android:src="@drawable/ic_spin"
+                android:src="@drawable/ic_launcher_background"
                 app:tint="#FFC107"/>
 
             <TextView
@@ -56,18 +56,25 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Spin &amp; Win Cash!"
-        android:textColor="#FFFFFF"
-        android:textSize="28sp"
+        android:textColor="@color/black"
+        android:textSize="26sp"
         android:textStyle="bold"
         android:layout_marginTop="30dp"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Use your coins to test your luck"
+        android:textColor="@color/gray_text"
+        android:textSize="14sp"/>
 
     <!-- Wheel Container -->
     <FrameLayout
         android:layout_width="320dp"
         android:layout_height="320dp"
-        android:layout_marginTop="40dp">
+        android:layout_marginTop="30dp">
 
-        <!-- Custom Wheel View -->
+        <!-- IMPORTANT: You must provide LuckyWheelView.java -->
         <com.smsindia.app.ui.LuckyWheelView
             android:id="@+id/wheel_view"
             android:layout_width="match_parent"
@@ -77,18 +84,18 @@
         <ImageView
             android:layout_width="60dp"
             android:layout_height="60dp"
-            android:src="@drawable/ic_spin" 
-            android:background="@drawable/bg_circle_edit"
-            app:tint="#FFFFFF"
+            android:src="@drawable/bg_circle_edit"
+            app:tint="@color/app_primary"
             android:layout_gravity="center"/>
             
         <!-- The Stopper Arrow (Pointing Left) -->
+        <!-- Tint changed to Black/Blue to be visible on light background -->
          <ImageView
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:src="@android:drawable/arrow_down_float"
             android:rotation="270"
-            app:tint="#FFFFFF"
+            app:tint="@color/app_primary_dark"
             android:layout_gravity="center_vertical|end"/>
 
     </FrameLayout>

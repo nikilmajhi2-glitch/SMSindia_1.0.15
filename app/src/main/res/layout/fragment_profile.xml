@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F5F7FA"
+    android:background="@color/gray_bg"
     android:fillViewport="true">
 
     <LinearLayout
@@ -12,11 +12,11 @@
         android:orientation="vertical"
         android:paddingBottom="30dp">
 
-        <!-- HEADER: Profile Pic & Phone -->
+        <!-- HEADER -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="#FFFFFF"
+            android:background="@color/white"
             android:orientation="vertical"
             android:gravity="center"
             android:paddingVertical="30dp"
@@ -26,24 +26,24 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content">
 
-                <!-- FIX: Changed src to @drawable/ic_launcher -->
                 <com.google.android.material.imageview.ShapeableImageView
                     android:id="@+id/img_profile"
                     android:layout_width="100dp"
                     android:layout_height="100dp"
-                    android:src="@drawable/ic_launcher"
+                    android:src="@drawable/ic_launcher_background"
                     android:scaleType="centerCrop"
-                    android:background="#E0E0E0"
+                    android:background="@color/gray_border"
                     android:padding="2dp"
                     app:shapeAppearanceOverlay="@style/CircleImageView"
                     app:strokeWidth="2dp"
-                    app:strokeColor="#6200EE"/>
+                    app:strokeColor="@color/app_primary"/>
 
+                <!-- Camera Icon with Brand Color -->
                 <ImageView
                     android:layout_width="32dp"
                     android:layout_height="32dp"
                     android:src="@android:drawable/ic_menu_camera"
-                    app:tint="#FFFFFF"
+                    app:tint="@color/white"
                     android:background="@drawable/bg_circle_edit"
                     android:padding="6dp"
                     android:layout_gravity="bottom|end"/>
@@ -56,18 +56,18 @@
                 android:text="+91 XXXXX XXXXX"
                 android:textSize="20sp"
                 android:textStyle="bold"
-                android:textColor="#000000"
+                android:textColor="@color/black"
                 android:layout_marginTop="16dp"/>
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Verified User"
-                android:textColor="#4CAF50"
+                android:textColor="@color/success_green"
                 android:textSize="14sp"
                 android:drawableStart="@android:drawable/checkbox_on_background"
                 android:drawablePadding="4dp"
-                android:drawableTint="#4CAF50"/>
+                android:drawableTint="@color/success_green"/>
         </LinearLayout>
 
         <!-- WALLET SECTION -->
@@ -78,7 +78,7 @@
             android:layout_margin="20dp"
             android:textSize="16sp"
             android:textStyle="bold"
-            android:textColor="#757575"/>
+            android:textColor="@color/gray_text"/>
 
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
@@ -86,7 +86,7 @@
             android:layout_marginHorizontal="20dp"
             app:cardCornerRadius="12dp"
             app:cardElevation="2dp"
-            app:cardBackgroundColor="#FFFFFF">
+            app:cardBackgroundColor="@color/white">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -98,7 +98,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Available Balance"
-                    android:textColor="#757575"/>
+                    android:textColor="@color/gray_text"/>
 
                 <TextView
                     android:id="@+id/tv_profile_balance"
@@ -107,25 +107,27 @@
                     android:text="₹ 0.00"
                     android:textSize="34sp"
                     android:textStyle="bold"
-                    android:textColor="#000000"
+                    android:textColor="@color/black"
                     android:layout_marginTop="4dp"/>
 
+                <!-- Primary Button -->
                 <Button
                     android:id="@+id/btn_withdraw"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="Request Withdrawal"
                     android:layout_marginTop="16dp"
-                    android:backgroundTint="#4CAF50"
+                    android:backgroundTint="@color/app_primary"
                     app:cornerRadius="8dp"/>
 
+                <!-- Text Button with Brand Color -->
                 <Button
                     android:id="@+id/btn_withdraw_history"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="View Withdrawal History"
-                    android:textColor="#6200EE"
-                    android:backgroundTint="#FFFFFF"
+                    android:textColor="@color/app_primary"
+                    android:backgroundTint="@color/white"
                     style="@style/Widget.MaterialComponents.Button.TextButton"/>
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
@@ -138,7 +140,7 @@
             android:layout_margin="20dp"
             android:textSize="16sp"
             android:textStyle="bold"
-            android:textColor="#757575"/>
+            android:textColor="@color/gray_text"/>
 
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
@@ -146,14 +148,13 @@
             android:layout_marginHorizontal="20dp"
             app:cardCornerRadius="12dp"
             app:cardElevation="2dp"
-            app:cardBackgroundColor="#FFFFFF">
+            app:cardBackgroundColor="@color/white">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
-                <!-- Display Saved Bank Info -->
                 <LinearLayout
                     android:id="@+id/layout_saved_bank"
                     android:layout_width="match_parent"
@@ -168,6 +169,7 @@
                         android:layout_height="wrap_content"
                         android:text="Bank Name"
                         android:textStyle="bold"
+                        android:textColor="@color/black"
                         android:textSize="16sp"/>
 
                     <TextView
@@ -175,21 +177,22 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="AC: XXXXXXXXX1234"
-                        android:textColor="#757575"/>
+                        android:textColor="@color/gray_text"/>
                 </LinearLayout>
 
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
-                    android:background="#F0F0F0"/>
+                    android:background="@color/gray_border"/>
 
+                <!-- Add Bank Link with Brand Color -->
                 <TextView
                     android:id="@+id/btn_add_bank"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="+ Add / Update Bank Account"
                     android:padding="20dp"
-                    android:textColor="#6200EE"
+                    android:textColor="@color/app_primary"
                     android:textStyle="bold"
                     android:gravity="center"
                     android:background="?attr/selectableItemBackground"/>

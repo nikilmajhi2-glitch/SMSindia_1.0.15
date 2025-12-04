@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -34,6 +35,9 @@ public class WithdrawalHistoryActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_withdrawal_history);
 
+        // Header Back Button
+        findViewById(R.id.btn_back).setOnClickListener(v -> finish());
+
         recyclerView = findViewById(R.id.recycler_withdrawals);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         list = new ArrayList<>();
@@ -59,6 +63,11 @@ public class WithdrawalHistoryActivity extends AppCompatActivity {
                         Double amount = doc.getDouble("amount");
                         String status = doc.getString("status");
                         Timestamp ts = doc.getTimestamp("timestamp");
+                        
+                        // Handle nulls safely
+                        if (amount == null) amount = 0.0;
+                        if (status == null) status = "Pending";
+                        
                         list.add(new WithdrawModel(amount, status, ts));
                     }
                     adapter.notifyDataSetChanged();
@@ -96,21 +105,27 @@ public class WithdrawalHistoryActivity extends AppCompatActivity {
             holder.amount.setText("₹ " + model.amount);
             
             if(model.timestamp != null) {
-                SimpleDateFormat sdf = new SimpleDateFormat("dd MMM yyyy, hh:mm a", Locale.getDefault());
+                SimpleDateFormat sdf = new SimpleDateFormat("dd MMM, hh:mm a", Locale.getDefault());
                 holder.date.setText(sdf.format(model.timestamp.toDate()));
+            } else {
+                holder.date.setText("Just Now");
             }
 
-            // STATUS LOGIC (Reviewing -> Processing -> Completed)
             holder.status.setText(model.status);
 
+            // Status Color Logic
             int color;
-            if ("Completed".equalsIgnoreCase(model.status)) {
+            if ("Completed".equalsIgnoreCase(model.status) || "Paid".equalsIgnoreCase(model.status)) {
                 color = Color.parseColor("#4CAF50"); // Green
             } else if ("Processing".equalsIgnoreCase(model.status)) {
                 color = Color.parseColor("#2196F3"); // Blue
+            } else if ("Failed".equalsIgnoreCase(model.status) || "Rejected".equalsIgnoreCase(model.status)) {
+                color = Color.parseColor("#F44336"); // Red
             } else {
                 color = Color.parseColor("#FF9800"); // Orange (Reviewing)
             }
+            
+            // Apply Tint to the background shape
             holder.status.setBackgroundTintList(ColorStateList.valueOf(color));
         }
 

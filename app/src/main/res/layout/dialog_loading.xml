@@ -1,24 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="wrap_content"
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="250dp"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:gravity="center"
-    android:padding="24dp"
-    android:background="@drawable/dialog_background">
+    app:cardCornerRadius="16dp"
+    app:cardElevation="10dp"
+    app:cardBackgroundColor="@color/white">
 
-    <ProgressBar
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:indeterminateTint="#FF6A00" />
-
-    <TextView
-        android:id="@+id/tv_loading_message"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Please wait..."
-        android:textSize="16sp"
-        android:textColor="#333"
-        android:layout_marginTop="12dp" />
+        android:orientation="vertical"
+        android:padding="24dp"
+        android:gravity="center">
 
-</LinearLayout>
+        <ProgressBar
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:indeterminate="true"
+            android:indeterminateTint="@color/app_primary"/>
+
+        <TextView
+            android:id="@+id/tv_loading_message"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Loading..."
+            android:textColor="@color/black"
+            android:textSize="14sp"
+            android:textStyle="bold"/>
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>

@@ -187,67 +187,7 @@ public class ProfileFragment extends Fragment {
         showAmountSelectionDialog();
     }
 
-    private void showAmountSelectionDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-        View view = LayoutInflater.from(getContext()).inflate(R.layout.dialog_select_amount, null);
-        builder.setView(view);
-        AlertDialog dialog = builder.create();
-
-        if (dialog.getWindow() != null) {
-            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        }
-
-        GridLayout gridLayout = view.findViewById(R.id.grid_amounts);
-        Button btnConfirm = view.findViewById(R.id.btn_confirm_withdraw);
-        selectedAmount = 0;
-
-        // Dynamically add amount boxes
-        for (int amount : WITHDRAWAL_OPTIONS) {
-            View itemView = LayoutInflater.from(getContext()).inflate(R.layout.item_amount_box, gridLayout, false);
-            TextView tvVal = itemView.findViewById(R.id.tv_amount_val);
-            MaterialCardView card = itemView.findViewById(R.id.card_amount);
-
-            tvVal.setText("₹" + amount);
-
-            itemView.setOnClickListener(v -> {
-                selectedAmount = amount;
-                btnConfirm.setEnabled(true);
-                btnConfirm.setText("Withdraw ₹" + amount);
-                
-                // ✅ FIXED LINE BELOW: Use Color.parseColor directly
-                btnConfirm.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#4CAF50")));
-
-                // Reset all boxes visual state
-                for (int i = 0; i < gridLayout.getChildCount(); i++) {
-                    View child = gridLayout.getChildAt(i);
-                    MaterialCardView c = child.findViewById(R.id.card_amount);
-                    TextView t = child.findViewById(R.id.tv_amount_val);
-
-                    c.setCardBackgroundColor(Color.parseColor("#F5F7FA"));
-                    c.setStrokeColor(Color.parseColor("#E0E0E0"));
-                    t.setTextColor(Color.BLACK);
-                }
-
-                // Highlight selected box
-                card.setCardBackgroundColor(Color.parseColor("#E8F5E9")); // Light Green
-                card.setStrokeColor(Color.parseColor("#4CAF50")); // Green
-                tvVal.setTextColor(Color.parseColor("#4CAF50"));
-            });
-
-            gridLayout.addView(itemView);
-        }
-
-        btnConfirm.setOnClickListener(v -> {
-            if (currentBalance < selectedAmount) {
-                Toast.makeText(getContext(), "Insufficient Balance!", Toast.LENGTH_SHORT).show();
-            } else {
-                processWithdrawal(selectedAmount, dialog);
-            }
-        });
-
-        dialog.show();
-    }
-
+    
     private void processWithdrawal(int amount, AlertDialog parentDialog) {
         WriteBatch batch = db.batch();
         DocumentReference userRef = db.collection("users").document(uid);

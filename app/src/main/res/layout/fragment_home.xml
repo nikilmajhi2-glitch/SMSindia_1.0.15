@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F5F7FA"
+    android:background="@color/gray_bg"
     android:fillViewport="true">
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -31,7 +31,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Welcome back,"
-                    android:textColor="#757575"
+                    android:textColor="@color/gray_text"
                     android:textSize="14sp" />
 
                 <TextView
@@ -39,28 +39,29 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="User"
-                    android:textColor="#000000"
+                    android:textColor="@color/black"
                     android:textStyle="bold"
                     android:textSize="18sp" />
             </LinearLayout>
 
+            <!-- Profile Icon -->
             <ImageView
                 android:layout_width="40dp"
                 android:layout_height="40dp"
-                android:src="@android:drawable/sym_def_app_icon"
-                app:tint="#6200EE"
-                android:background="@android:color/white"
+                android:src="@drawable/ic_launcher_background"
+                app:tint="@color/app_primary" 
+                android:background="@drawable/bg_circle_white"
                 android:padding="5dp"/>
         </LinearLayout>
 
-        <!-- Balance Card -->
+        <!-- Balance Card (SOLID BRAND COLOR) -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/cardBalance"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="20dp"
             android:layout_marginTop="10dp"
-            app:cardBackgroundColor="#6200EE"
+            app:cardBackgroundColor="@color/app_primary"
             app:cardCornerRadius="20dp"
             app:cardElevation="8dp"
             app:layout_constraintTop_toBottomOf="@id/layoutHeader">
@@ -75,7 +76,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Total Balance"
-                    android:textColor="#E0E0E0"
+                    android:textColor="#CCFFFFFF"
                     android:textSize="14sp" />
 
                 <TextView
@@ -84,11 +85,10 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
                     android:text="₹ 0.00"
-                    android:textColor="#FFFFFF"
+                    android:textColor="@color/white"
                     android:textSize="32sp"
                     android:textStyle="bold" />
 
-                <!-- UPDATED: Only History Button Here -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -100,15 +100,14 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="View Wallet History"
-                        android:textColor="#FFFFFF"
-                        android:backgroundTint="#4527A0"
+                        android:textColor="@color/white"
+                        android:backgroundTint="@color/app_primary_dark"
                         style="@style/Widget.MaterialComponents.Button"/>
                 </LinearLayout>
-
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- Slidable Banners (ViewPager2) -->
+        <!-- Featured Label -->
         <TextView
             android:id="@+id/lbl_featured"
             android:layout_width="wrap_content"
@@ -116,11 +115,13 @@
             android:text="Featured Updates"
             android:textSize="16sp"
             android:textStyle="bold"
+            android:textColor="@color/black"
             android:layout_marginTop="24dp"
             android:layout_marginStart="20dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/cardBalance"/>
 
+        <!-- Banner -->
         <androidx.viewpager2.widget.ViewPager2
             android:id="@+id/banner_viewpager"
             android:layout_width="match_parent"
@@ -132,7 +133,7 @@
             android:clipChildren="false"
             app:layout_constraintTop_toBottomOf="@id/lbl_featured" />
 
-        <!-- Quick Actions Grid (Daily Checkin) -->
+        <!-- Quick Actions -->
         <TextView
             android:id="@+id/lbl_actions"
             android:layout_width="wrap_content"
@@ -140,6 +141,7 @@
             android:text="Quick Actions"
             android:textSize="16sp"
             android:textStyle="bold"
+            android:textColor="@color/black"
             android:layout_marginTop="24dp"
             android:layout_marginStart="20dp"
             app:layout_constraintStart_toStartOf="parent"
@@ -153,13 +155,14 @@
             android:padding="15dp"
             app:layout_constraintTop_toBottomOf="@id/lbl_actions">
 
-            <!-- Daily Check-in Card -->
+            <!-- Daily Check-in -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/card_daily_checkin"
                 android:layout_width="0dp"
                 android:layout_height="100dp"
                 android:layout_weight="1"
                 android:layout_margin="5dp"
+                app:cardBackgroundColor="@color/white"
                 app:cardCornerRadius="12dp"
                 app:cardElevation="2dp">
 
@@ -169,28 +172,31 @@
                     android:gravity="center"
                     android:orientation="vertical">
 
+                    <!-- Uses Brand Color -->
                     <ImageView
                         android:layout_width="32dp"
                         android:layout_height="32dp"
-                        android:src="@drawable/ic_calendar"
-                        app:tint="#FF9800"/>
+                        android:src="@android:drawable/ic_menu_my_calendar"
+                        app:tint="@color/app_primary"/>
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
                         android:text="Daily Check-in"
+                        android:textColor="@color/black"
                         android:textSize="14sp"
                         android:textStyle="bold"/>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Support Card -->
+            <!-- Support -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="0dp"
                 android:layout_height="100dp"
                 android:layout_weight="1"
                 android:layout_margin="5dp"
+                app:cardBackgroundColor="@color/white"
                 app:cardCornerRadius="12dp"
                 app:cardElevation="2dp">
 
@@ -200,17 +206,19 @@
                     android:gravity="center"
                     android:orientation="vertical">
 
+                    <!-- Uses Brand Color -->
                     <ImageView
                         android:layout_width="32dp"
                         android:layout_height="32dp"
                         android:src="@android:drawable/ic_dialog_email"
-                        app:tint="#2196F3"/>
+                        app:tint="@color/app_primary"/>
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
                         android:text="Support"
+                        android:textColor="@color/black"
                         android:textSize="14sp"
                         android:textStyle="bold"/>
                 </LinearLayout>

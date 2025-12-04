@@ -1,74 +1,170 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
-    android:padding="24dp"
-    android:gravity="center"
-    android:background="#FFF8F0"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/gray_bg"
+    android:fillViewport="true">
 
-    <TextView
-        android:text="🔒 SMSIndia Secure Login"
-        android:textSize="22sp"
-        android:textStyle="bold"
-        android:textColor="#FF6F00"
-        android:layout_marginBottom="30dp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
-
-    <EditText
-        android:id="@+id/phoneInput"
-        android:hint="Mobile Number"
-        android:inputType="phone"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:backgroundTint="#FF6F00"
-        android:layout_marginBottom="16dp" />
+        android:orientation="vertical">
 
-    <EditText
-        android:id="@+id/passwordInput"
-        android:hint="Password"
-        android:inputType="textPassword"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:backgroundTint="#FF6F00"
-        android:layout_marginBottom="16dp" />
+        <!-- Header Design -->
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="220dp"
+            android:background="@drawable/bg_login_header">
 
-    <!-- ✅ ADDED: Referral Code Input -->
-    <EditText
-        android:id="@+id/referInput"
-        android:hint="Referral Code (Optional)"
-        android:inputType="phone"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:backgroundTint="#FFA040"
-        android:layout_marginBottom="24dp" />
+            <ImageView
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:layout_centerInParent="true"
+                android:src="@drawable/ic_launcher_background"
+                app:tint="@color/white"
+                android:id="@+id/logo"/>
 
-    <Button
-        android:id="@+id/loginBtn"
-        android:text="Login"
-        android:textStyle="bold"
-        android:backgroundTint="#FF6F00"
-        android:textColor="@android:color/white"
-        android:layout_width="match_parent"
-        android:layout_height="55dp" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/logo"
+                android:layout_centerHorizontal="true"
+                android:text="SMS INDIA"
+                android:textColor="@color/white"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:letterSpacing="0.1"/>
+        </RelativeLayout>
 
-    <Button
-        android:id="@+id/signupBtn"
-        android:text="Register New Account"
-        android:textStyle="bold"
-        android:backgroundTint="#FFA040"
-        android:textColor="@android:color/white"
-        android:layout_width="match_parent"
-        android:layout_height="55dp"
-        android:layout_marginTop="12dp" />
+        <!-- Login Form Card -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="24dp"
+            android:layout_marginTop="-30dp"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="8dp"
+            app:cardBackgroundColor="@color/white">
 
-    <TextView
-        android:id="@+id/deviceIdText"
-        android:text="Device ID: ..."
-        android:textSize="12sp"
-        android:textColor="#888"
-        android:layout_marginTop="30dp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
-</LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="24dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Welcome Back"
+                    android:textColor="@color/black"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="20dp"/>
+
+                <!-- Phone Input -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Mobile Number"
+                    app:boxBackgroundColor="@color/white"
+                    app:boxStrokeColor="@color/app_primary"
+                    app:startIconDrawable="@android:drawable/sym_action_call"
+                    app:startIconTint="@color/app_primary"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/phoneInput"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="phone"
+                        android:maxLength="10"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- Password Input -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:hint="Password"
+                    app:boxBackgroundColor="@color/white"
+                    app:boxStrokeColor="@color/app_primary"
+                    app:startIconDrawable="@android:drawable/ic_lock_idle_lock"
+                    app:startIconTint="@color/app_primary"
+                    app:endIconMode="password_toggle"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/passwordInput"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="textPassword"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- Referral Input (Optional) -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:hint="Referral Code (Optional)"
+                    app:boxBackgroundColor="@color/white"
+                    app:boxStrokeColor="@color/success_green"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/referInput"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="phone"
+                        android:maxLength="10"/>
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- Buttons -->
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/loginBtn"
+                    android:layout_width="match_parent"
+                    android:layout_height="55dp"
+                    android:layout_marginTop="24dp"
+                    android:text="LOGIN"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    app:cornerRadius="8dp"
+                    android:backgroundTint="@color/app_primary"/>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/signupBtn"
+                    android:layout_width="match_parent"
+                    android:layout_height="55dp"
+                    android:layout_marginTop="10dp"
+                    android:text="REGISTER NEW ACCOUNT"
+                    android:textColor="@color/app_primary"
+                    app:strokeColor="@color/app_primary"
+                    app:strokeWidth="1dp"
+                    app:cornerRadius="8dp"
+                    android:backgroundTint="@color/white"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"/>
+
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <TextView
+            android:id="@+id/deviceIdText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="30dp"
+            android:text="Device ID: ..."
+            android:gravity="center"
+            android:textSize="11sp"
+            android:textColor="@color/gray_text"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="v1.0.0 | Secure Login"
+            android:gravity="center"
+            android:textSize="11sp"
+            android:textColor="@color/gray_text"
+            android:layout_marginBottom="20dp"/>
+
+    </LinearLayout>
+</ScrollView>

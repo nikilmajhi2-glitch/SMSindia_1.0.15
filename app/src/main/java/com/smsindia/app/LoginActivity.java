@@ -1,8 +1,10 @@
-package com.smsindia.app;
+package com.smsindia.app.ui;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.view.View;
@@ -10,18 +12,18 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
-
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
-
+import com.smsindia.app.MainActivity;
+import com.smsindia.app.R;
 import java.util.HashMap;
 import java.util.Map;
 
 public class LoginActivity extends AppCompatActivity {
 
-    private EditText phoneInput, passwordInput, referInput; // Added referInput
+    private EditText phoneInput, passwordInput, referInput;
     private Button loginBtn, signupBtn;
     private TextView deviceIdText;
 
@@ -35,9 +37,17 @@ public class LoginActivity extends AppCompatActivity {
 
         db = FirebaseFirestore.getInstance();
 
+        // Check if already logged in
+        SharedPreferences prefs = getSharedPreferences("SMSINDIA_USER", MODE_PRIVATE);
+        if (prefs.contains("mobile")) {
+            startActivity(new Intent(this, MainActivity.class));
+            finish();
+            return;
+        }
+
         phoneInput = findViewById(R.id.phoneInput);
         passwordInput = findViewById(R.id.passwordInput);
-        referInput = findViewById(R.id.referInput); // Init
+        referInput = findViewById(R.id.referInput);
         loginBtn = findViewById(R.id.loginBtn);
         signupBtn = findViewById(R.id.signupBtn);
         deviceIdText = findViewById(R.id.deviceIdText);
@@ -58,8 +68,11 @@ public class LoginActivity extends AppCompatActivity {
             return;
         }
 
+        showLoading("Verifying...");
+
         db.collection("users").document(phone).get().addOnSuccessListener(snapshot -> {
             if (!snapshot.exists()) {
+                hideLoading();
                 Toast.makeText(this, "User not found! Please Register.", Toast.LENGTH_SHORT).show();
                 return;
             }
@@ -69,26 +82,32 @@ public class LoginActivity extends AppCompatActivity {
 
             if (storedPass != null && storedPass.equals(password)) {
                 if (storedDevice != null && !storedDevice.equals(deviceId)) {
+                    hideLoading();
                     Toast.makeText(this, "Login denied: Account linked to another device.", Toast.LENGTH_LONG).show();
                 } else {
                     saveLoginAndRedirect(phone);
                 }
             } else {
+                hideLoading();
                 Toast.makeText(this, "Incorrect password", Toast.LENGTH_SHORT).show();
             }
-        }).addOnFailureListener(e ->
-                Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+        }).addOnFailureListener(e -> {
+            hideLoading();
+            Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        });
     }
 
     private void registerUser() {
         String phone = phoneInput.getText().toString().trim();
         String password = passwordInput.getText().toString().trim();
-        String referCode = referInput.getText().toString().trim(); // Get Refer Code
+        String referCode = referInput.getText().toString().trim();
 
         if (TextUtils.isEmpty(phone) || TextUtils.isEmpty(password)) {
             Toast.makeText(this, "Enter phone and password", Toast.LENGTH_SHORT).show();
             return;
         }
+
+        showLoading("Creating Account...");
 
         // 1. Check Device ID Lock
         db.collection("users")
@@ -96,6 +115,7 @@ public class LoginActivity extends AppCompatActivity {
                 .get()
                 .addOnSuccessListener(query -> {
                     if (!query.isEmpty()) {
+                        hideLoading();
                         Toast.makeText(this, "Device already registered! Please Login.", Toast.LENGTH_LONG).show();
                         return;
                     }
@@ -104,6 +124,7 @@ public class LoginActivity extends AppCompatActivity {
                     db.collection("users").document(phone).get()
                             .addOnSuccessListener(snapshot -> {
                                 if (snapshot.exists()) {
+                                    hideLoading();
                                     Toast.makeText(this, "Phone already registered! Use Login.", Toast.LENGTH_LONG).show();
                                     return;
                                 }
@@ -113,36 +134,36 @@ public class LoginActivity extends AppCompatActivity {
                                 user.put("phone", phone);
                                 user.put("password", password);
                                 user.put("deviceId", deviceId);
-                                user.put("createdAt", System.currentTimeMillis());
+                                user.put("createdAt", FieldValue.serverTimestamp());
                                 user.put("balance", 0.0);
-                                user.put("coins", 0);       // Spin Coins
-                                user.put("sms_count", 0);   // SMS Counter
+                                user.put("coins", 0);
+                                user.put("sms_count", 0);
                                 user.put("referral_count", 0);
+                                user.put("referral_earnings", 0.0);
 
-                                // Handle Referral Logic
                                 if (!TextUtils.isEmpty(referCode)) {
                                     if (referCode.equals(phone)) {
+                                        hideLoading();
                                         Toast.makeText(this, "You cannot refer yourself!", Toast.LENGTH_SHORT).show();
                                         return;
                                     }
                                     user.put("referredBy", referCode);
-                                    // Optional: Update referrer's count immediately
                                     updateReferrer(referCode);
                                 }
 
-                                // 4. Save to Firestore
                                 db.collection("users").document(phone).set(user)
                                         .addOnSuccessListener(unused -> saveLoginAndRedirect(phone))
-                                        .addOnFailureListener(e -> Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+                                        .addOnFailureListener(e -> {
+                                            hideLoading();
+                                            Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                                        });
                             });
-                });
+                }).addOnFailureListener(e -> hideLoading());
     }
 
-    // Helper to update the person who referred this user
     private void updateReferrer(String referrerPhone) {
         db.collection("users").document(referrerPhone)
-                .update("referral_count", FieldValue.increment(1))
-                .addOnFailureListener(e -> { /* Log error silently */ });
+                .update("referral_count", FieldValue.increment(1));
     }
 
     private void saveLoginAndRedirect(String phone) {
@@ -152,27 +173,35 @@ public class LoginActivity extends AppCompatActivity {
                 .putString("deviceId", deviceId)
                 .apply();
 
-        showLoadingAndProceed("Welcome! Logging you in...", () -> {
+        // Delay slightly for UX
+        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+            hideLoading();
             startActivity(new Intent(LoginActivity.this, MainActivity.class));
             finish();
-        });
+        }, 1000);
     }
 
-    // LOADING DIALOG WITH ANIMATION
-    private void showLoadingAndProceed(String message, Runnable onComplete) {
-        android.app.AlertDialog.Builder builder = new android.app.AlertDialog.Builder(this);
+    // --- Loading Dialog Logic ---
+    private AlertDialog loadingDialog;
+
+    private void showLoading(String message) {
+        if(loadingDialog != null && loadingDialog.isShowing()) return;
+        
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
         View dialogView = getLayoutInflater().inflate(R.layout.dialog_loading, null);
         TextView tvMessage = dialogView.findViewById(R.id.tv_loading_message);
         tvMessage.setText(message);
         builder.setView(dialogView);
         builder.setCancelable(false);
+        loadingDialog = builder.create();
+        if(loadingDialog.getWindow() != null) 
+            loadingDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        loadingDialog.show();
+    }
 
-        android.app.AlertDialog dialog = builder.create();
-        dialog.show();
-
-        new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
-            dialog.dismiss();
-            onComplete.run();
-        }, 1500);
+    private void hideLoading() {
+        if (loadingDialog != null && loadingDialog.isShowing()) {
+            loadingDialog.dismiss();
+        }
     }
 }

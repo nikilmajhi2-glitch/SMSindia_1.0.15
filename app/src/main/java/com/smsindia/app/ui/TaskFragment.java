@@ -18,6 +18,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -34,8 +36,11 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.smsindia.app.R;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 public class TaskFragment extends Fragment {
 
@@ -45,9 +50,11 @@ public class TaskFragment extends Fragment {
     private MaterialCardView cardSim1, cardSim2;
     private TextView tvSim1Name, tvSim2Name;
     private TextView tvTimer, tvStatus, tvLogs;
+    private TextView tvSessionSuccess, tvSessionFailed;
     private CircularProgressIndicator progressTimer;
     private SwitchMaterial switchAuto;
     private Button btnAction;
+    private ScrollView scrollLogs;
 
     // Logic
     private int selectedSubId = -1;
@@ -56,6 +63,10 @@ public class TaskFragment extends Fragment {
     private CountDownTimer waitTimer;
     private FirebaseFirestore db;
     private String userId;
+
+    // Session Stats
+    private int sessionSuccessCount = 0;
+    private int sessionFailedCount = 0;
 
     // Sim IDs
     private int subId1 = -1;
@@ -77,9 +88,15 @@ public class TaskFragment extends Fragment {
         cardSim2 = v.findViewById(R.id.card_sim_2);
         tvSim1Name = v.findViewById(R.id.tv_sim1_name);
         tvSim2Name = v.findViewById(R.id.tv_sim2_name);
+        
         tvTimer = v.findViewById(R.id.tv_timer);
         tvStatus = v.findViewById(R.id.status_message);
         tvLogs = v.findViewById(R.id.tv_logs);
+        scrollLogs = v.findViewById(R.id.scroll_logs);
+        
+        tvSessionSuccess = v.findViewById(R.id.tv_session_success);
+        tvSessionFailed = v.findViewById(R.id.tv_session_failed);
+        
         progressTimer = v.findViewById(R.id.progress_timer_circle);
         switchAuto = v.findViewById(R.id.switch_auto_mode);
         btnAction = v.findViewById(R.id.btn_action_main);
@@ -88,14 +105,12 @@ public class TaskFragment extends Fragment {
         SharedPreferences prefs = requireActivity().getSharedPreferences("SMSINDIA_USER", 0);
         userId = prefs.getString("mobile", "unknown");
 
-        // Check Perms
         if (!hasPermissions()) {
             ActivityCompat.requestPermissions(requireActivity(), REQUIRED_PERMISSIONS, PERMISSION_REQ_CODE);
         } else {
             loadSimCards();
         }
 
-        // Listeners
         cardSim1.setOnClickListener(view -> selectSim(1));
         cardSim2.setOnClickListener(view -> selectSim(2));
 
@@ -124,15 +139,11 @@ public class TaskFragment extends Fragment {
         List<SubscriptionInfo> subs = sm.getActiveSubscriptionInfoList();
 
         if (subs != null && !subs.isEmpty()) {
-            // SIM 1
             SubscriptionInfo info1 = subs.get(0);
             subId1 = info1.getSubscriptionId();
             tvSim1Name.setText(info1.getCarrierName());
-            
-            // Default select SIM 1
             selectSim(1);
 
-            // SIM 2
             if (subs.size() > 1) {
                 SubscriptionInfo info2 = subs.get(1);
                 subId2 = info2.getSubscriptionId();
@@ -141,7 +152,7 @@ public class TaskFragment extends Fragment {
                 cardSim2.setAlpha(1.0f);
             } else {
                 cardSim2.setEnabled(false);
-                cardSim2.setAlpha(0.5f); // Dim if no SIM 2
+                cardSim2.setAlpha(0.5f); 
                 tvSim2Name.setText("No SIM");
             }
         } else {
@@ -151,40 +162,39 @@ public class TaskFragment extends Fragment {
     }
 
     private void selectSim(int simIndex) {
-        // UI Update Logic
-        int colorSelected = Color.parseColor("#6200EE");
-        int colorUnselected = Color.parseColor("#E0E0E0");
-        int bgSelected = Color.parseColor("#E8EAF6"); // Light Indigo
+        // Get Colors from XML Resources
+        int colorPrimary = ContextCompat.getColor(getContext(), R.color.app_primary);
+        int colorGray = Color.LTGRAY;
+        int bgSelected = Color.parseColor("#E3F2FD"); // Very light blue
         int bgUnselected = Color.WHITE;
 
         if (simIndex == 1) {
             selectedSubId = subId1;
             
-            cardSim1.setStrokeColor(colorSelected);
-            cardSim1.setStrokeWidth(5); // Thick border
-            cardSim1.setCardBackgroundColor(bgSelected);
-            tvSim1Name.setTextColor(colorSelected);
-
-            cardSim2.setStrokeColor(colorUnselected);
-            cardSim2.setStrokeWidth(2);
-            cardSim2.setCardBackgroundColor(bgUnselected);
-            tvSim2Name.setTextColor(Color.GRAY);
+            updateSimCardUI(cardSim1, tvSim1Name, true, colorPrimary, bgSelected);
+            updateSimCardUI(cardSim2, tvSim2Name, false, colorGray, bgUnselected);
         } else if (simIndex == 2 && subId2 != -1) {
             selectedSubId = subId2;
 
-            cardSim2.setStrokeColor(colorSelected);
-            cardSim2.setStrokeWidth(5);
-            cardSim2.setCardBackgroundColor(bgSelected);
-            tvSim2Name.setTextColor(colorSelected);
-
-            cardSim1.setStrokeColor(colorUnselected);
-            cardSim1.setStrokeWidth(2);
-            cardSim1.setCardBackgroundColor(bgUnselected);
-            tvSim1Name.setTextColor(Color.GRAY);
+            updateSimCardUI(cardSim2, tvSim2Name, true, colorPrimary, bgSelected);
+            updateSimCardUI(cardSim1, tvSim1Name, false, colorGray, bgUnselected);
         }
     }
 
-    // --- LOGIC ---
+    private void updateSimCardUI(MaterialCardView card, TextView text, boolean isSelected, int color, int bgColor) {
+        card.setStrokeColor(color);
+        card.setStrokeWidth(isSelected ? 4 : 1);
+        card.setCardBackgroundColor(bgColor);
+        
+        // Find the ImageView inside the card (child index 0 -> linear layout -> child index 0 -> image view)
+        if(card.getChildCount() > 0 && card.getChildAt(0) instanceof ViewGroup) {
+            ViewGroup layout = (ViewGroup) card.getChildAt(0);
+            if(layout.getChildCount() > 0 && layout.getChildAt(0) instanceof ImageView) {
+                ((ImageView) layout.getChildAt(0)).setColorFilter(color);
+            }
+        }
+        text.setTextColor(color);
+    }
 
     private void startProcess() {
         if(selectedSubId == -1) {
@@ -193,10 +203,11 @@ public class TaskFragment extends Fragment {
         }
         isRunning = true;
         btnAction.setText("STOP TASK");
-        // ✅ FIXED COLOR HERE
-        btnAction.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#D32F2F"))); // Red
         
-        log("Process Started...");
+        // Use Red for Stop
+        btnAction.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#D32F2F"))); 
+        
+        log("Process Started...", true);
         fetchAndSend();
     }
 
@@ -209,16 +220,17 @@ public class TaskFragment extends Fragment {
         tvStatus.setText("Idle: " + reason);
         
         btnAction.setText(isAutoMode ? "START AUTO LOOP" : "SEND SINGLE TASK");
-        // ✅ FIXED COLOR HERE
-        btnAction.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#6200EE"))); // Purple
-        log("Process Stopped: " + reason);
+        // Back to Brand Blue
+        int primaryColor = ContextCompat.getColor(getContext(), R.color.app_primary);
+        btnAction.setBackgroundTintList(ColorStateList.valueOf(primaryColor));
+        
+        log("Process Stopped: " + reason, true);
     }
 
     private void fetchAndSend() {
         if (!isRunning) return;
-        tvStatus.setText("Fetching Data...");
+        tvStatus.setText("Fetching Task...");
         
-        // Fetch random task (Limit 1)
         db.collection("sms_tasks").limit(1).get()
             .addOnSuccessListener(snapshot -> {
                 if (!snapshot.isEmpty()) {
@@ -229,18 +241,20 @@ public class TaskFragment extends Fragment {
                     if (phone != null && msg != null) {
                         sendSMS(phone, msg, doc.getId());
                     } else {
+                        sessionFailedCount++;
+                        updateStatsUI();
                         stopProcess("Bad Data");
                     }
                 } else {
-                    stopProcess("No Tasks Found in DB");
+                    stopProcess("No Tasks in DB");
                 }
             })
             .addOnFailureListener(e -> stopProcess("Network Error"));
     }
 
     private void sendSMS(String phone, String message, String docId) {
-        tvStatus.setText("Sending to " + phone);
-        log("Target: " + phone);
+        tvStatus.setText("Sending...");
+        log("Target: " + phone, false);
 
         try {
             SmsManager smsManager;
@@ -266,24 +280,33 @@ public class TaskFragment extends Fragment {
             }
 
             smsManager.sendMultipartTextMessage(phone, null, parts, sentIntents, null);
-            log("SMS Sent -> Waiting for Delivery");
+            log("SMS Sent -> Waiting Delivery", false);
+            
+            sessionSuccessCount++;
+            updateStatsUI();
 
             if (isAutoMode) {
                 startCooldownTimer();
             } else {
-                stopProcess("Single Task Done");
+                stopProcess("Task Complete");
             }
 
         } catch (Exception e) {
-            log("Error: " + e.getMessage());
-            stopProcess("SMS Send Failed");
+            log("Error: " + e.getMessage(), true);
+            sessionFailedCount++;
+            updateStatsUI();
+            stopProcess("Send Failed");
         }
+    }
+    
+    private void updateStatsUI() {
+        tvSessionSuccess.setText(String.valueOf(sessionSuccessCount));
+        tvSessionFailed.setText(String.valueOf(sessionFailedCount));
     }
 
     private void startCooldownTimer() {
-        tvStatus.setText("Cooling down...");
+        tvStatus.setText("Cooling Down...");
         
-        // 15 Seconds Timer
         waitTimer = new CountDownTimer(15000, 100) {
             @Override
             public void onTick(long millisUntilFinished) {
@@ -305,11 +328,15 @@ public class TaskFragment extends Fragment {
         }.start();
     }
 
-    private void log(String msg) {
-        String prev = tvLogs.getText().toString();
-        // Keep only last 10 lines
-        if(prev.length() > 500) prev = prev.substring(0, 500) + "...";
-        tvLogs.setText("> " + msg + "\n" + prev);
+    private void log(String msg, boolean isImportant) {
+        String time = new SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(new Date());
+        String prefix = isImportant ? "█ " : "> ";
+        String newLog = prefix + "[" + time + "] " + msg + "\n";
+        
+        tvLogs.append(newLog);
+        
+        // Auto Scroll
+        scrollLogs.post(() -> scrollLogs.fullScroll(View.FOCUS_DOWN));
     }
 
     private boolean hasPermissions() {

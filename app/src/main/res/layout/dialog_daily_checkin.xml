@@ -7,7 +7,7 @@
     android:layout_margin="16dp"
     app:cardCornerRadius="24dp"
     app:cardElevation="12dp"
-    app:cardBackgroundColor="#FFFFFF">
+    app:cardBackgroundColor="@color/white">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -15,11 +15,11 @@
         android:orientation="vertical"
         android:paddingBottom="24dp">
 
-        <!-- Header with Color -->
+        <!-- Header with BRAND COLOR -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="#6200EE"
+            android:background="@color/app_primary"
             android:gravity="center"
             android:orientation="vertical"
             android:paddingVertical="24dp">
@@ -28,7 +28,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Daily Rewards"
-                android:textColor="#FFFFFF"
+                android:textColor="@color/white"
                 android:textSize="22sp"
                 android:textStyle="bold" />
 
@@ -53,14 +53,13 @@
             android:rowCount="2"
             android:useDefaultMargins="true">
 
-            <!-- ROW 1: Days 1-5 -->
+            <!-- Matches Java IDs exactly -->
             <include layout="@layout/item_day_reward" android:id="@+id/day1" />
             <include layout="@layout/item_day_reward" android:id="@+id/day2" />
             <include layout="@layout/item_day_reward" android:id="@+id/day3" />
             <include layout="@layout/item_day_reward" android:id="@+id/day4" />
             <include layout="@layout/item_day_reward" android:id="@+id/day5" />
 
-            <!-- ROW 2: Days 6-10 -->
             <include layout="@layout/item_day_reward" android:id="@+id/day6" />
             <include layout="@layout/item_day_reward" android:id="@+id/day7" />
             <include layout="@layout/item_day_reward" android:id="@+id/day8" />
@@ -77,6 +76,7 @@
             android:paddingHorizontal="24dp"
             android:layout_marginTop="10dp">
 
+            <!-- Claim Button in BRAND COLOR -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_claim_reward"
                 android:layout_width="match_parent"
@@ -85,8 +85,8 @@
                 android:textSize="16sp"
                 android:textStyle="bold"
                 app:cornerRadius="30dp"
-                android:backgroundTint="#FFC107"
-                android:textColor="#000000"
+                android:backgroundTint="@color/app_primary"
+                android:textColor="@color/white"
                 android:elevation="4dp"/>
 
             <TextView
@@ -96,7 +96,7 @@
                 android:layout_gravity="center"
                 android:layout_marginTop="16dp"
                 android:text="No, Thanks"
-                android:textColor="#9E9E9E"
+                android:textColor="@color/gray_text"
                 android:textStyle="bold"
                 android:padding="10dp"/>
         </LinearLayout>

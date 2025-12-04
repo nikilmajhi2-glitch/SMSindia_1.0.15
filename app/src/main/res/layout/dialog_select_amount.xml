@@ -1,53 +1,53 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
+<com.google.android.material.card.MaterialCardView 
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="320dp"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:padding="24dp"
-    android:background="#FFFFFF">
+    app:cardCornerRadius="20dp"
+    app:cardElevation="10dp"
+    app:cardBackgroundColor="#FFFFFF">
 
-    <TextView
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Withdraw Money"
-        android:textSize="22sp"
-        android:textStyle="bold"
-        android:textColor="#000000"
-        android:gravity="center"/>
+        android:orientation="vertical"
+        android:padding="24dp">
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Select an amount to withdraw"
-        android:textSize="14sp"
-        android:textColor="#757575"
-        android:gravity="center"
-        android:layout_marginTop="4dp"
-        android:layout_marginBottom="20dp"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Withdraw Money"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="#000000"/>
 
-    <!-- 3 Columns Grid -->
-    <GridLayout
-        android:id="@+id/grid_amounts"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:columnCount="3"
-        android:rowCount="2"
-        android:alignmentMode="alignMargins"
-        android:layout_gravity="center">
-        
-        <!-- We will add items here programmatically in Java -->
-        
-    </GridLayout>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Select an amount to transfer to your bank."
+            android:textSize="14sp"
+            android:textColor="#757575"
+            android:layout_marginBottom="20dp"/>
 
-    <Button
-        android:id="@+id/btn_confirm_withdraw"
-        android:layout_width="match_parent"
-        android:layout_height="55dp"
-        android:text="Withdraw Now"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        android:layout_marginTop="24dp"
-        android:backgroundTint="#4CAF50"
-        android:enabled="false"/>
+        <!-- Grid for Amounts -->
+        <GridLayout
+            android:id="@+id/grid_amounts"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:columnCount="3"
+            android:rowCount="2"
+            android:alignmentMode="alignMargins"/>
 
-</LinearLayout>
+        <Button
+            android:id="@+id/btn_confirm_withdraw"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:text="Select Amount"
+            android:layout_marginTop="20dp"
+            android:enabled="false"
+            android:backgroundTint="#BDBDBD"
+            app:cornerRadius="10dp"/>
+
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>

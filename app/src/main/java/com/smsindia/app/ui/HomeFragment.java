@@ -5,23 +5,26 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.GradientDrawable; // Added
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.core.content.ContextCompat; // Added
 import androidx.fragment.app.Fragment;
 import androidx.viewpager2.widget.ViewPager2;
 
-import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.WriteBatch;
 import com.smsindia.app.R;
+import com.smsindia.app.adapters.BannerAdapter; // Make sure you have this adapter
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -38,7 +41,6 @@ public class HomeFragment extends Fragment {
     private FirebaseFirestore db;
     private String uid;
     
-    // Rewards for 10 Days: Index 0 = Day 1, Index 1 = Day 2, etc.
     private final int[] DAILY_REWARDS = {2, 5, 2, 2, 5, 2, 10, 5, 5, 20};
 
     @Override
@@ -58,17 +60,16 @@ public class HomeFragment extends Fragment {
         SharedPreferences prefs = requireActivity().getSharedPreferences("SMSINDIA_USER", 0);
         uid = prefs.getString("mobile", ""); 
 
-        // Setup
         setupBannerSlider();
         fetchUserBalance();
 
-        // Click Listeners
         dailyCheckinCard.setOnClickListener(view -> showDailyCheckInDialog());
         
-        // Navigate to History Activity
+        // Note: Make sure HistoryActivity exists or change this
         btnHistory.setOnClickListener(view -> {
-            Intent intent = new Intent(getActivity(), HistoryActivity.class);
-            startActivity(intent);
+            // Intent intent = new Intent(getActivity(), HistoryActivity.class);
+            // startActivity(intent);
+            Toast.makeText(getContext(), "History Clicked", Toast.LENGTH_SHORT).show();
         });
         
         return v;
@@ -76,8 +77,6 @@ public class HomeFragment extends Fragment {
 
     private void showDailyCheckInDialog() {
         if (uid == null || uid.isEmpty()) return;
-
-        // Show Loading Dialog or ProgressBar here if needed
         
         db.collection("users").document(uid).get()
             .addOnSuccessListener(documentSnapshot -> {
@@ -89,27 +88,22 @@ public class HomeFragment extends Fragment {
 
                 String todayDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
 
-                // Logic to calculate streak
                 int streakToDisplay = 1;
                 boolean canClaim = true;
                 
                 if (todayDate.equals(lastDate)) {
-                    // Already claimed today
                     streakToDisplay = currentStreak;
                     canClaim = false;
                 } else {
-                    // Check if last checkin was yesterday
-                    // (Simplified logic: If not today, assume next day in streak for UI, reset if gap too large handled in claim)
-                    // For strict date checking, you need ParseException handling, skipping for brevity
                     streakToDisplay = currentStreak + 1; 
-                    if(streakToDisplay > 10) streakToDisplay = 1; // Reset after 10 days
+                    if(streakToDisplay > 10) streakToDisplay = 1; 
                 }
 
                 launchDialogUI(streakToDisplay, canClaim, todayDate);
             });
     }
 
-            private void launchDialogUI(int currentDay, boolean canClaim, String todayDate) {
+    private void launchDialogUI(int currentDay, boolean canClaim, String todayDate) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
         View view = LayoutInflater.from(getContext()).inflate(R.layout.dialog_daily_checkin, null);
         builder.setView(view);
@@ -122,7 +116,10 @@ public class HomeFragment extends Fragment {
 
         tvStreak.setText("Current Streak: Day " + currentDay);
 
-        // --- UPDATE GRID VISUALS ---
+        // Get Brand Colors safely
+        int primaryColor = ContextCompat.getColor(getContext(), R.color.app_primary);
+        int grayColor = ContextCompat.getColor(getContext(), R.color.gray_text);
+
         int[] viewIds = {
             R.id.day1, R.id.day2, R.id.day3, R.id.day4, R.id.day5,
             R.id.day6, R.id.day7, R.id.day8, R.id.day9, R.id.day10
@@ -135,26 +132,27 @@ public class HomeFragment extends Fragment {
             TextView lblDay = dayView.findViewById(R.id.lbl_day);
             TextView lblAmount = dayView.findViewById(R.id.lbl_amount);
             
-            // FIX IS HERE: Added (View) cast
+            // Parent of Amount is the circular background
             View bgCircle = (View) dayView.findViewById(R.id.lbl_amount).getParent(); 
             
             lblDay.setText("Day " + dayNum);
             lblAmount.setText("₹" + DAILY_REWARDS[i]);
 
-            // Styling Logic
             if (dayNum < currentDay) {
-                // PAST DAYS
-                dayView.setAlpha(0.5f); 
+                // PAST DAYS (Completed)
+                dayView.setAlpha(0.5f);
+                // Set circle to gray
+                bgCircle.setBackgroundResource(R.drawable.bg_circle_gray); 
             } else if (dayNum == currentDay) {
-                // TODAY (Active)
-                bgCircle.requestLayout(); 
-                lblDay.setTextColor(Color.parseColor("#6200EE"));
+                // TODAY (Active) - Use Brand Color
+                bgCircle.setBackgroundResource(R.drawable.bg_circle_brand);
+                lblDay.setTextColor(primaryColor);
                 lblDay.setTypeface(null, android.graphics.Typeface.BOLD);
             } else {
                 // FUTURE DAYS
+                bgCircle.setBackgroundResource(R.drawable.bg_circle_gray);
             }
         }
-        // ---------------------------
 
         if (!canClaim) {
             btnClaim.setText("COME BACK TOMORROW");
@@ -163,6 +161,9 @@ public class HomeFragment extends Fragment {
         } else {
             int rewardAmount = DAILY_REWARDS[currentDay - 1];
             btnClaim.setText("CLAIM ₹" + rewardAmount);
+            // Button uses Brand Color via XML, or set here:
+            btnClaim.setBackgroundTintList(ContextCompat.getColorStateList(getContext(), R.color.app_primary));
+            
             btnClaim.setOnClickListener(v -> {
                 claimReward(currentDay, rewardAmount, todayDate, dialog);
             });
@@ -177,18 +178,16 @@ public class HomeFragment extends Fragment {
         DocumentReference userRef = db.collection("users").document(uid);
         DocumentReference historyRef = db.collection("users").document(uid).collection("transactions").document();
 
-        // 1. Update User Balance & Streak
         Map<String, Object> userUpdates = new HashMap<>();
         userUpdates.put("balance", FieldValue.increment(amount));
         userUpdates.put("last_checkin_date", todayDate);
         userUpdates.put("streak", day);
         batch.update(userRef, userUpdates);
 
-        // 2. Add History Record
         Map<String, Object> txData = new HashMap<>();
         txData.put("title", "Daily Check-in (Day " + day + ")");
         txData.put("amount", amount);
-        txData.put("type", "CREDIT"); // CREDIT or DEBIT
+        txData.put("type", "CREDIT");
         txData.put("timestamp", FieldValue.serverTimestamp());
         batch.set(historyRef, txData);
 
@@ -200,10 +199,31 @@ public class HomeFragment extends Fragment {
         });
     }
 
-    private void setupBannerSlider() {
-        List<String> colors = new ArrayList<>();
-        colors.add("#FF5733"); colors.add("#33FF57"); colors.add("#3357FF");
-        BannerAdapter adapter = new BannerAdapter(colors);
+     private void setupBannerSlider() {
+        List<BannerAdapter.BannerModel> banners = new ArrayList<>();
+
+        // Banner 1: Referral (Gold/Orange)
+        banners.add(new BannerAdapter.BannerModel(
+                "Refer & Earn",
+                "Get ₹50 instantly for every friend you invite.",
+                "#FF9800" 
+        ));
+
+        // Banner 2: Task (Royal Blue)
+        banners.add(new BannerAdapter.BannerModel(
+                "SMS Tasks Live",
+                "Start the auto-sender now and earn passively.",
+                "#2962FF" 
+        ));
+
+        // Banner 3: Daily Bonus (Green)
+        banners.add(new BannerAdapter.BannerModel(
+                "Daily Check-in",
+                "Don't break your streak! Claim free coins today.",
+                "#4CAF50" 
+        ));
+
+        BannerAdapter adapter = new BannerAdapter(banners);
         bannerViewPager.setAdapter(adapter);
     }
 

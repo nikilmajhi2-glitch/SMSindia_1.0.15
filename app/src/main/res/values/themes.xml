@@ -2,19 +2,27 @@
 <resources>
     <!-- Base Theme -->
     <style name="Theme.SMSIndia" parent="Theme.Material3.DayNight.NoActionBar">
-        <item name="colorPrimary">@color/md_theme_primary</item>
-        <item name="android:statusBarColor">@color/md_theme_primary</item>
-        <item name="android:windowBackground">@color/md_theme_background</item>
+        <!-- Brand Colors -->
+        <item name="colorPrimary">@color/app_primary</item>
+        <item name="colorPrimaryVariant">@color/app_primary_dark</item>
+        <item name="colorOnPrimary">@color/white</item>
+        
+        <!-- Secondary Color (Used for Floating Action Buttons, Switches, etc.) -->
+        <item name="colorSecondary">@color/app_primary</item>
+        <item name="colorOnSecondary">@color/white</item>
+
+        <!-- Status Bar -->
+        <item name="android:statusBarColor">@color/app_primary</item>
+        <item name="android:windowLightStatusBar">false</item> <!-- White text on Blue bar -->
+
+        <!-- Background -->
+        <item name="android:windowBackground">@color/gray_bg</item>
+        
+        <!-- Button Style Override -->
         <item name="materialButtonStyle">@style/Widget.MaterialComponents.Button</item>
     </style>
 
-    <!-- No Action Bar Variant -->
-    <style name="Theme.SMSIndia.NoActionBar" parent="Theme.SMSIndia">
-        <item name="windowActionBar">false</item>
-        <item name="android:windowNoTitle">true</item>
-    </style>
-
-    <!-- ✅ CORRECT: This style must be outside, as a direct child of <resources> -->
+    <!-- Circle Image Style (Used in Profile) -->
     <style name="CircleImageView">
         <item name="cornerFamily">rounded</item>
         <item name="cornerSize">50%</item>

@@ -1,5 +1,7 @@
 package com.smsindia.app.ui;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -14,6 +16,8 @@ import androidx.fragment.app.Fragment;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.smsindia.app.R;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 
 public class SpinFragment extends Fragment {
@@ -27,16 +31,9 @@ public class SpinFragment extends Fragment {
     private long spinTokens = 0;
     private boolean isSpinning = false;
 
-    // Wheel Data corresponding to the LuckyWheelView string array
-    // {"₹0.6", "₹0.8", "₹10", "₹0", "₹100", "₹0.6"}
-    // Indices:
-    // 0: ₹0.6
-    // 1: ₹0.8
-    // 2: ₹10
-    // 3: ₹0
-    // 4: ₹100
-    // 5: ₹0.6
-    private Double[] rewardsValue = {0.6, 0.8, 10.0, 0.0, 100.0, 0.6};
+    // Rewards configuration
+    // Index: 0=0.6, 1=0.8, 2=10, 3=0, 4=100, 5=0.6
+    private final Double[] rewardsValue = {0.6, 0.8, 10.0, 0.0, 100.0, 0.6};
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -55,7 +52,7 @@ public class SpinFragment extends Fragment {
         btnSpin.setOnClickListener(view -> {
             if (isSpinning) return;
             if (spinTokens <= 0) {
-                Toast.makeText(getContext(), "No Spin Tokens left! Refer friends to earn more.", Toast.LENGTH_LONG).show();
+                Toast.makeText(getContext(), "No Spin Coins left! Refer friends to earn more.", Toast.LENGTH_LONG).show();
                 return;
             }
             startRiggedSpin();
@@ -67,8 +64,8 @@ public class SpinFragment extends Fragment {
     private void fetchSpinTokens() {
         if(uid.isEmpty()) return;
         db.collection("users").document(uid).addSnapshotListener((snapshot, e) -> {
-            if (e != null || snapshot == null) return;
-            Long tokens = snapshot.getLong("coins"); // Assuming 'coins' is spin token
+            if (e != null || snapshot == null || !snapshot.exists()) return;
+            Long tokens = snapshot.getLong("coins"); 
             spinTokens = (tokens != null) ? tokens : 0;
             tvTokens.setText(String.valueOf(spinTokens));
         });
@@ -77,41 +74,30 @@ public class SpinFragment extends Fragment {
     private void startRiggedSpin() {
         isSpinning = true;
         btnSpin.setEnabled(false);
+        btnSpin.setText("Spinning...");
 
-        // Deduct Token in Cloud
+        // Deduct 1 Coin immediately
         db.collection("users").document(uid).update("coins", FieldValue.increment(-1));
 
-        // --- PROBABILITY LOGIC (96% for 0.6) ---
+        // --- RIGGED LOGIC ---
         int targetIndex;
         int rand = new Random().nextInt(100); // 0 to 99
 
-        if (rand < 96) {
-            // 96% Chance: Land on Index 0 or 5 (Values 0.6)
+        if (rand < 90) {
+            // 90% Chance: Small Win (0.6)
             targetIndex = (new Random().nextBoolean()) ? 0 : 5;
+        } else if (rand < 98) {
+             // 8% Chance: Medium (0.8 or 0)
+             targetIndex = (new Random().nextBoolean()) ? 1 : 3;
         } else {
-            // 4% Chance: Land on others (1, 2, 3, 4)
-            // 1=0.8, 2=10, 3=0, 4=100
-             int[] others = {1, 2, 3, 4};
-             targetIndex = others[new Random().nextInt(others.length)];
+            // 2% Chance: Jackpot (10 or 100)
+            targetIndex = (new Random().nextBoolean()) ? 2 : 4;
         }
         
-        // --- CALCULATE ROTATION ---
-        // 6 sectors total. Each is 60 degrees.
-        // We want the target sector to stop at the Right side (Indicator at 0 degrees usually, but let's assume Arrow is at 3 o'clock / 0 deg on unit circle)
-        // Adjust depending on where your start angle in LuckyWheelView is.
-        // In our View, index 0 starts at 0 deg (3 o'clock) going clockwise.
-        
+        // Calculate Rotation
         float sectorAngle = 360f / 6f;
-        
-        // To land index i at the indicator (angle 0), we need to rotate negative i * sectorAngle.
-        // Adding rotation pushes the slice defined at start away.
-        // Final Rotation = (360 - (targetIndex * sectorAngle)) + (360 * rotations)
-        
-        float finalAngle = (360 - (targetIndex * sectorAngle)) + (360 * 10); // 10 spins
-        
-        // Add a little randomness inside the sector center to look real
-        // Center of sector is sectorAngle/2.
-        finalAngle -= (sectorAngle / 2); 
+        float finalAngle = (360 - (targetIndex * sectorAngle)) + (360 * 10); // 10 full spins
+        finalAngle -= (sectorAngle / 2); // Center adjustment
 
         ObjectAnimator animator = ObjectAnimator.ofFloat(wheelView, "rotation", 0f, finalAngle);
         animator.setDuration(4000);
@@ -120,23 +106,35 @@ public class SpinFragment extends Fragment {
 
         Double reward = rewardsValue[targetIndex];
 
-        animator.addListener(new android.animation.AnimatorListenerAdapter() {
+        animator.addListener(new AnimatorListenerAdapter() {
             @Override
-            public void onAnimationEnd(android.animation.Animator animation) {
+            public void onAnimationEnd(Animator animation) {
                 isSpinning = false;
-                btnSpin.setEnabled(true);
-                handleWin(reward);
+                if (isAdded()) { // Check if user is still on this screen
+                    btnSpin.setEnabled(true);
+                    btnSpin.setText("SPIN NOW");
+                    handleWin(reward);
+                }
             }
         });
     }
 
     private void handleWin(Double reward) {
         if (reward > 0) {
-            Toast.makeText(getContext(), "You Won ₹" + reward + "!", Toast.LENGTH_LONG).show();
+            // 1. Update Balance
             db.collection("users").document(uid).update("balance", FieldValue.increment(reward));
             
-            // Add Transaction History for tracking
-            // Use HashMap and specific collection reference if you implemented history earlier
+            // 2. Record History (Added this!)
+            Map<String, Object> tx = new HashMap<>();
+            tx.put("title", "Spin Reward");
+            tx.put("amount", reward);
+            tx.put("type", "CREDIT");
+            tx.put("timestamp", FieldValue.serverTimestamp());
+            
+            db.collection("users").document(uid)
+                    .collection("transactions").add(tx);
+
+            Toast.makeText(getContext(), "You Won ₹" + reward + "!", Toast.LENGTH_LONG).show();
         } else {
             Toast.makeText(getContext(), "Better Luck Next Time!", Toast.LENGTH_SHORT).show();
         }

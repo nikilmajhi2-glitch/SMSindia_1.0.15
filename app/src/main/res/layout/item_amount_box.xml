@@ -1,30 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/card_amount"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:layout_margin="8dp"
-    android:clickable="true"
-    android:focusable="true"
-    app:cardBackgroundColor="#F5F7FA"
-    app:cardCornerRadius="12dp"
-    app:cardElevation="0dp"
-    app:strokeColor="#E0E0E0"
-    app:strokeWidth="1dp">
+    android:padding="5dp">
 
-    <LinearLayout
-        android:layout_width="90dp"
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/card_amount"
+        android:layout_width="80dp"
         android:layout_height="60dp"
-        android:gravity="center">
+        app:cardCornerRadius="8dp"
+        app:cardElevation="0dp"
+        app:strokeWidth="1dp"
+        app:strokeColor="#E0E0E0"
+        app:cardBackgroundColor="#F5F7FA">
 
         <TextView
             android:id="@+id/tv_amount_val"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:text="₹100"
-            android:textColor="#000000"
-            android:textSize="18sp"
-            android:textStyle="bold" />
-    </LinearLayout>
-</com.google.android.material.card.MaterialCardView>
+            android:gravity="center"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="#000000"/>
+
+    </com.google.android.material.card.MaterialCardView>
+</LinearLayout>

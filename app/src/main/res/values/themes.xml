@@ -7,22 +7,27 @@
         <item name="colorPrimaryVariant">@color/app_primary_dark</item>
         <item name="colorOnPrimary">@color/white</item>
         
-        <!-- Secondary Color (Used for Floating Action Buttons, Switches, etc.) -->
+        <!-- Secondary Color -->
         <item name="colorSecondary">@color/app_primary</item>
         <item name="colorOnSecondary">@color/white</item>
 
         <!-- Status Bar -->
         <item name="android:statusBarColor">@color/app_primary</item>
-        <item name="android:windowLightStatusBar">false</item> <!-- White text on Blue bar -->
+        <item name="android:windowLightStatusBar">false</item>
 
         <!-- Background -->
         <item name="android:windowBackground">@color/gray_bg</item>
         
-        <!-- Button Style Override -->
         <item name="materialButtonStyle">@style/Widget.MaterialComponents.Button</item>
     </style>
 
-    <!-- Circle Image Style (Used in Profile) -->
+    <!-- ✅ FIXED: Added this back so AndroidManifest can find it -->
+    <style name="Theme.SMSIndia.NoActionBar" parent="Theme.SMSIndia">
+        <item name="windowActionBar">false</item>
+        <item name="android:windowNoTitle">true</item>
+    </style>
+
+    <!-- Circle Image Style -->
     <style name="CircleImageView">
         <item name="cornerFamily">rounded</item>
         <item name="cornerSize">50%</item>

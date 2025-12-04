@@ -7,6 +7,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.telephony.SmsManager;
 import android.util.Log;
 
@@ -25,6 +26,7 @@ import com.smsindia.app.R;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 
 public class SmsWorker extends Worker {
 
@@ -45,127 +47,95 @@ public class SmsWorker extends Worker {
     @NonNull
     @Override
     public Result doWork() {
-        if (uid.isEmpty()) {
-            return Result.failure(new Data.Builder()
-                    .putString("error", "User not logged in")
-                    .build());
-        }
+        if (uid.isEmpty()) return Result.failure();
 
-        setForegroundAsync(createForegroundInfo("Loading tasks..."));
+        // Get Selected SIM ID from Input Data
+        int subId = getInputData().getInt("subId", -1);
 
-        List<Map<String, Object>> tasks;
-        try {
-            tasks = loadGlobalTasksSync();
-        } catch (Exception e) {
-            Log.e(TAG, "Firestore failed", e);
-            return Result.failure(new Data.Builder()
-                    .putString("error", "Firestore error: " + e.getMessage())
-                    .build());
-        }
-
-        if (tasks.isEmpty()) {
-            setProgressAsync(new Data.Builder().putInt("sent", 0).putInt("total", 0).build());
-            setForegroundAsync(createForegroundInfo("No tasks"));
-            return Result.success();
-        }
-
-        SmsManager sms = SmsManager.getDefault();
-        int sent = 0;
+        setForegroundAsync(createForegroundInfo("Processing Task..."));
 
         try {
-            for (Map<String, Object> t : tasks) {
-                if (isStopped()) break;
+            // Fetch 1 pending task synchronously
+            Map<String, Object> task = fetchOneTaskSync();
 
-                String phone = (String) t.get("phone");
-                String msg = (String) t.get("message");
-                String docId = (String) t.get("id");
-
-                if (phone == null || msg == null || docId == null) {
-                    Log.e(TAG, "Missing data: phone=" + phone + ", msg=" + msg);
-                    continue;
-                }
-
-                // FIX: Normalize phone number
-                String cleanPhone = phone.replaceAll("[^0-9+]", "");
-                if (!cleanPhone.startsWith("+")) {
-                    cleanPhone = "+91" + cleanPhone; // Default India
-                }
-
-                Log.d(TAG, "Sending to: " + cleanPhone + " | Msg: " + msg);
-
-                try {
-                    Intent delivered = new Intent("com.smsindia.SMS_DELIVERED");
-                    delivered.putExtra("userId", uid);
-                    delivered.putExtra("docId", docId);
-                    delivered.putExtra("phone", cleanPhone);
-
-                    PendingIntent pi = PendingIntent.getBroadcast(
-                            context, docId.hashCode(), delivered,
-                            PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
-                    );
-
-                    sms.sendTextMessage(cleanPhone, null, msg, null, pi);
-                    sent++;
-
-                    setProgressAsync(new Data.Builder()
-                            .putInt("sent", sent)
-                            .putInt("total", tasks.size())
-                            .build());
-
-                    setForegroundAsync(createForegroundInfo("Sent " + sent + "/" + tasks.size()));
-
-                    Thread.sleep(1200);
-                } catch (Exception e) {
-                    Log.e(TAG, "SMS FAILED for " + cleanPhone, e);
-                    // BUG FIX: Delete failed task from Firestore so it's not reassigned
-                    db.collection("sms_tasks").document(docId).delete();
-                }
+            if (task == null) {
+                return Result.success(); // No tasks available
             }
+
+            String phone = (String) task.get("phone");
+            String msg = (String) task.get("message");
+            String docId = (String) task.get("id");
+
+            if (phone != null && msg != null) {
+                sendSmsOnSim(subId, phone, msg, docId);
+            }
+
             return Result.success();
+
         } catch (Exception e) {
-            Log.e(TAG, "Worker crashed", e);
-            return Result.failure(new Data.Builder()
-                    .putString("error", "Send crash: " + e.getMessage())
-                    .build());
+            Log.e(TAG, "Worker Error", e);
+            return Result.retry();
         }
     }
 
-    private List<Map<String, Object>> loadGlobalTasksSync() throws Exception {
-        final List<Map<String, Object>> tasks = new ArrayList<>();
-        final Object lock = new Object();
-        final Exception[] error = {null};
+    private void sendSmsOnSim(int subId, String phone, String message, String docId) {
+        try {
+            // 1. Get Correct SMS Manager (Dual SIM Support)
+            SmsManager smsManager;
+            if (subId != -1 && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    smsManager = context.getSystemService(SmsManager.class).createForSubscriptionId(subId);
+                } else {
+                    smsManager = SmsManager.getSmsManagerForSubscriptionId(subId);
+                }
+            } else {
+                smsManager = SmsManager.getDefault();
+            }
 
-        Log.d(TAG, "Loading global sms_tasks...");
+            // 2. Prepare Intents (Must match SmsDeliveryReceiver)
+            ArrayList<String> parts = smsManager.divideMessage(message);
+            ArrayList<PendingIntent> sentIntents = new ArrayList<>();
 
-        db.collection("sms_tasks")
-                .get()
-                .addOnSuccessListener(querySnapshot -> {
-                    int size = querySnapshot.size();
-                    Log.d(TAG, "SUCCESS: Found " + size + " tasks");
-                    for (DocumentSnapshot doc : querySnapshot) {
-                        Map<String, Object> data = doc.getData();
-                        if (data != null) {
-                            data.put("id", doc.getId());
-                            tasks.add(data);
-                            Log.d(TAG, "Task loaded: " + data.get("phone"));
-                        }
-                    }
-                    synchronized (lock) { lock.notify(); }
-                })
-                .addOnFailureListener(e -> {
-                    Log.e(TAG, "Firestore query failed", e);
-                    error[0] = e;
-                    synchronized (lock) { lock.notify(); }
-                });
+            for (int i = 0; i < parts.size(); i++) {
+                Intent sent = new Intent("com.smsindia.SMS_SENT");
+                sent.setClass(context, com.smsindia.app.receivers.SmsDeliveryReceiver.class);
+                sent.putExtra("userId", uid);
+                sent.putExtra("docId", docId);
+                sent.putExtra("phone", phone);
+                
+                // Important: Android 12+ requires FLAG_IMMUTABLE or MUTABLE
+                int flags = PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE;
+                PendingIntent pi = PendingIntent.getBroadcast(context, (docId+i).hashCode(), sent, flags);
+                sentIntents.add(pi);
+            }
 
-        synchronized (lock) { lock.wait(10000); }
+            // 3. Send Multipart
+            smsManager.sendMultipartTextMessage(phone, null, parts, sentIntents, null);
+            Log.d(TAG, "Sent to " + phone + " via SubID: " + subId);
 
-        if (error[0] != null) {
-            throw error[0];
+        } catch (Exception e) {
+            Log.e(TAG, "Send Failed", e);
         }
+    }
 
-        Log.d(TAG, "Returning " + tasks.size() + " tasks");
-        return tasks;
+    // Helper to fetch data synchronously in a Worker
+    private Map<String, Object> fetchOneTaskSync() throws InterruptedException {
+        final Map<String, Object>[] result = new Map[1];
+        final CountDownLatch latch = new CountDownLatch(1);
+
+        db.collection("sms_tasks").limit(1).get()
+                .addOnSuccessListener(snapshot -> {
+                    if (!snapshot.isEmpty()) {
+                        DocumentSnapshot doc = snapshot.getDocuments().get(0);
+                        result[0] = doc.getData();
+                        if (result[0] != null) result[0].put("id", doc.getId());
+                    }
+                    latch.countDown();
+                })
+                .addOnFailureListener(e -> latch.countDown());
+
+        latch.await(); // Wait for Firebase
+        return result[0];
     }
 
     private ForegroundInfo createForegroundInfo(String content) {
@@ -174,19 +144,18 @@ public class SmsWorker extends Worker {
         PendingIntent pi = PendingIntent.getActivity(context, 0, i, PendingIntent.FLAG_IMMUTABLE);
 
         Notification n = new NotificationCompat.Builder(context, CHANNEL_ID)
-                .setContentTitle("SMSIndia")
+                .setContentTitle("SMS Background Task")
                 .setContentText(content)
-                .setSmallIcon(R.drawable.ic_stat_name)
+                .setSmallIcon(R.drawable.ic_launcher_foreground) // Ensure this icon exists
                 .setContentIntent(pi)
                 .setOngoing(true)
-                .setOnlyAlertOnce(true)
                 .build();
 
         return new ForegroundInfo(1, n);
     }
 
     private void createChannel() {
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationChannel channel = new NotificationChannel(
                     CHANNEL_ID, "SMS Worker", NotificationManager.IMPORTANCE_LOW);
             NotificationManager manager = context.getSystemService(NotificationManager.class);

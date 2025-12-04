@@ -127,7 +127,16 @@ public class SmsWorker extends Worker {
                     if (!snapshot.isEmpty()) {
                         DocumentSnapshot doc = snapshot.getDocuments().get(0);
                         result[0] = doc.getData();
-                        if (result[0] != null) result[0].put("id", doc.getId());
+                        if (result[0] != null) {
+                            result[0].put("id", doc.getId());
+                            
+                            // =========================================================
+                            // ✅ CRITICAL FIX: DELETE TASK IMMEDIATELY
+                            // =========================================================
+                            // This prevents the app from fetching the same task again
+                            // in the next loop while the SMS is still sending.
+                            doc.getReference().delete(); 
+                        }
                     }
                     latch.countDown();
                 })
@@ -145,7 +154,6 @@ public class SmsWorker extends Worker {
         Notification n = new NotificationCompat.Builder(context, CHANNEL_ID)
                 .setContentTitle("SMS Background Task")
                 .setContentText(content)
-                // ✅ FIXED: Using ic_sim_card instead of ic_launcher_foreground
                 .setSmallIcon(R.drawable.ic_sim_card) 
                 .setContentIntent(pi)
                 .setOngoing(true)

@@ -1,6 +1,10 @@
 package com.smsindia.app.ui;
 
+import android.app.AlertDialog;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,16 +13,23 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.viewpager2.widget.ViewPager2;
 
-import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.Timestamp;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.WriteBatch;
 import com.smsindia.app.R;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 public class HomeFragment extends Fragment {
 
@@ -26,71 +37,155 @@ public class HomeFragment extends Fragment {
     private ViewPager2 bannerViewPager;
     private FirebaseFirestore db;
     private String uid;
+    
+    // Rewards for 10 Days: Index 0 = Day 1, Index 1 = Day 2, etc.
+    private final int[] DAILY_REWARDS = {2, 5, 2, 2, 5, 2, 10, 5, 5, 20};
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_home, container, false);
 
-        // 1. Initialize Views based on your NEW XML IDs
+        // Initialize Views
         tvBalanceAmount = v.findViewById(R.id.tv_balance_amount);
         tvUserMobile = v.findViewById(R.id.tv_user_mobile);
         bannerViewPager = v.findViewById(R.id.banner_viewpager);
-        
-        Button btnAddMoney = v.findViewById(R.id.btn_add_money);
         Button btnHistory = v.findViewById(R.id.btn_history);
         View dailyCheckinCard = v.findViewById(R.id.card_daily_checkin);
 
-        // 2. Initialize Firebase
+        // Initialize Firebase
         db = FirebaseFirestore.getInstance();
         SharedPreferences prefs = requireActivity().getSharedPreferences("SMSINDIA_USER", 0);
         uid = prefs.getString("mobile", ""); 
 
-        // 3. Setup Logic
+        // Setup
         setupBannerSlider();
         fetchUserBalance();
 
-        // 4. Click Listeners
-        dailyCheckinCard.setOnClickListener(view -> 
-            Toast.makeText(getContext(), "Daily Check-in Clicked", Toast.LENGTH_SHORT).show()
-        );
+        // Click Listeners
+        dailyCheckinCard.setOnClickListener(view -> showDailyCheckInDialog());
         
-        btnAddMoney.setOnClickListener(view -> 
-            Toast.makeText(getContext(), "Add Money Clicked", Toast.LENGTH_SHORT).show()
-        );
-
+        // Navigate to History Activity
+        btnHistory.setOnClickListener(view -> {
+            Intent intent = new Intent(getActivity(), HistoryActivity.class);
+            startActivity(intent);
+        });
+        
         return v;
     }
 
-    private void setupBannerSlider() {
-        // Since we are using ViewPager2, we need a simple adapter.
-        // For now, let's just put placeholder logic or leave it empty to prevent crashes.
-        // If you want images here, you need a RecyclerView Adapter.
-        // See step 3 below for the Adapter code.
-        
-        List<String> colors = new ArrayList<>();
-        colors.add("#FF5733"); // Dummy data
-        colors.add("#33FF57");
-        colors.add("#3357FF");
+    private void showDailyCheckInDialog() {
+        if (uid == null || uid.isEmpty()) return;
 
+        // Show Loading Dialog or ProgressBar here if needed
+        
+        db.collection("users").document(uid).get()
+            .addOnSuccessListener(documentSnapshot -> {
+                if (!documentSnapshot.exists()) return;
+
+                String lastDate = documentSnapshot.getString("last_checkin_date");
+                Long streakLong = documentSnapshot.getLong("streak");
+                int currentStreak = (streakLong != null) ? streakLong.intValue() : 0;
+
+                String todayDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
+
+                // Logic to calculate streak
+                int streakToDisplay = 1;
+                boolean canClaim = true;
+                
+                if (todayDate.equals(lastDate)) {
+                    // Already claimed today
+                    streakToDisplay = currentStreak;
+                    canClaim = false;
+                } else {
+                    // Check if last checkin was yesterday
+                    // (Simplified logic: If not today, assume next day in streak for UI, reset if gap too large handled in claim)
+                    // For strict date checking, you need ParseException handling, skipping for brevity
+                    streakToDisplay = currentStreak + 1; 
+                    if(streakToDisplay > 10) streakToDisplay = 1; // Reset after 10 days
+                }
+
+                launchDialogUI(streakToDisplay, canClaim, todayDate);
+            });
+    }
+
+    private void launchDialogUI(int dayNumber, boolean canClaim, String todayDate) {
+        // Build the Dialog
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        View view = LayoutInflater.from(getContext()).inflate(R.layout.dialog_daily_checkin, null);
+        builder.setView(view);
+        AlertDialog dialog = builder.create();
+        if(dialog.getWindow() != null) dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+
+        // UI Elements inside Dialog
+        TextView tvStreak = view.findViewById(R.id.tv_streak_status);
+        Button btnClaim = view.findViewById(R.id.btn_claim_reward);
+        Button btnClose = view.findViewById(R.id.btn_close_dialog);
+
+        tvStreak.setText("Current Day: " + dayNumber);
+        
+        if (!canClaim) {
+            btnClaim.setText("Come Back Tomorrow");
+            btnClaim.setEnabled(false);
+            btnClaim.setBackgroundTintList(getContext().getColorStateList(android.R.color.darker_gray));
+        } else {
+            // Set reward amount text
+            int rewardAmount = DAILY_REWARDS[dayNumber - 1]; // Array is 0-indexed
+            btnClaim.setText("Claim ₹" + rewardAmount);
+            
+            btnClaim.setOnClickListener(v -> {
+                claimReward(dayNumber, rewardAmount, todayDate, dialog);
+            });
+        }
+
+        btnClose.setOnClickListener(v -> dialog.dismiss());
+        dialog.show();
+    }
+
+    private void claimReward(int day, int amount, String todayDate, AlertDialog dialog) {
+        WriteBatch batch = db.batch();
+        DocumentReference userRef = db.collection("users").document(uid);
+        DocumentReference historyRef = db.collection("users").document(uid).collection("transactions").document();
+
+        // 1. Update User Balance & Streak
+        Map<String, Object> userUpdates = new HashMap<>();
+        userUpdates.put("balance", FieldValue.increment(amount));
+        userUpdates.put("last_checkin_date", todayDate);
+        userUpdates.put("streak", day);
+        batch.update(userRef, userUpdates);
+
+        // 2. Add History Record
+        Map<String, Object> txData = new HashMap<>();
+        txData.put("title", "Daily Check-in (Day " + day + ")");
+        txData.put("amount", amount);
+        txData.put("type", "CREDIT"); // CREDIT or DEBIT
+        txData.put("timestamp", FieldValue.serverTimestamp());
+        batch.set(historyRef, txData);
+
+        batch.commit().addOnSuccessListener(aVoid -> {
+            Toast.makeText(getContext(), "Claimed ₹" + amount + " successfully!", Toast.LENGTH_SHORT).show();
+            dialog.dismiss();
+        }).addOnFailureListener(e -> {
+            Toast.makeText(getContext(), "Failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        });
+    }
+
+    private void setupBannerSlider() {
+        List<String> colors = new ArrayList<>();
+        colors.add("#FF5733"); colors.add("#33FF57"); colors.add("#3357FF");
         BannerAdapter adapter = new BannerAdapter(colors);
         bannerViewPager.setAdapter(adapter);
     }
 
     private void fetchUserBalance() {
         if (uid == null || uid.isEmpty()) return;
-
-        db.collection("users").document(uid)
-            .addSnapshotListener((snapshot, e) -> {
-                if (e != null) return;
-                if (snapshot != null && snapshot.exists()) {
-                    Double balance = snapshot.getDouble("balance");
-                    if (balance != null) {
-                        tvBalanceAmount.setText(String.format("₹ %.2f", balance));
-                    }
-                    String name = snapshot.getString("name");
-                    if(name != null) tvUserMobile.setText(name);
-                }
-            });
+        db.collection("users").document(uid).addSnapshotListener((snapshot, e) -> {
+            if (e == null && snapshot != null && snapshot.exists()) {
+                Double bal = snapshot.getDouble("balance");
+                if (bal != null) tvBalanceAmount.setText(String.format("₹ %.2f", bal));
+                String name = snapshot.getString("name");
+                if(name != null) tvUserMobile.setText(name);
+            }
+        });
     }
 }

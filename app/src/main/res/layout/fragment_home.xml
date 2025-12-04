@@ -48,7 +48,6 @@
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:src="@android:drawable/sym_def_app_icon"
-
                 app:tint="#6200EE"
                 android:background="@android:color/white"
                 android:padding="5dp"/>
@@ -89,30 +88,23 @@
                     android:textSize="32sp"
                     android:textStyle="bold" />
 
+                <!-- UPDATED: Only History Button Here -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="20dp"
-                    android:orientation="horizontal">
-
-                    <Button
-                        android:id="@+id/btn_add_money"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Add Money"
-                        android:textColor="#6200EE"
-                        android:backgroundTint="#FFFFFF"
-                        android:layout_marginEnd="10dp"/>
+                    android:orientation="vertical">
 
                     <Button
                         android:id="@+id/btn_history"
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="History"
+                        android:text="View Wallet History"
                         android:textColor="#FFFFFF"
                         android:backgroundTint="#4527A0"
-                        style="@style/Widget.MaterialComponents.Button.TextButton"/>
+                        style="@style/Widget.MaterialComponents.Button"/>
                 </LinearLayout>
+
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
@@ -177,7 +169,6 @@
                     android:gravity="center"
                     android:orientation="vertical">
 
-                    <!-- Using ic_calendar which we just created -->
                     <ImageView
                         android:layout_width="32dp"
                         android:layout_height="32dp"

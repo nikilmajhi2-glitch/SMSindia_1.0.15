@@ -57,7 +57,14 @@
             android:exported="false"
             android:label="Delivery Logs" />
 
-      <!-- FIREBASE MESSAGING -->
+        <!-- ✅ ADDED: WALLET HISTORY ACTIVITY -->
+        <activity
+            android:name=".ui.HistoryActivity"
+            android:exported="false"
+            android:label="Wallet History"
+            android:parentActivityName=".MainActivity" />
+
+        <!-- FIREBASE MESSAGING -->
         <service
             android:name=".service.MyFirebaseMessagingService"
             android:exported="false">
@@ -66,7 +73,7 @@
             </intent-filter>
         </service>
 
-        <!-- SMS DELIVERY RECEIVER - SIMPLIFIED -->
+        <!-- SMS DELIVERY RECEIVER -->
         <receiver
             android:name=".receivers.SmsDeliveryReceiver"
             android:enabled="true"
@@ -76,7 +83,7 @@
             </intent-filter>
         </receiver>
 
-        <!-- BOOT RECEIVER - YOUR OWN -->
+        <!-- BOOT RECEIVER -->
         <receiver
             android:name=".receivers.BootReceiver"
             android:enabled="true"

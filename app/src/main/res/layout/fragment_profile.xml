@@ -26,11 +26,12 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content">
 
+                <!-- FIX: Changed src to @drawable/ic_launcher -->
                 <com.google.android.material.imageview.ShapeableImageView
                     android:id="@+id/img_profile"
                     android:layout_width="100dp"
                     android:layout_height="100dp"
-                    android:src="@mipmap/ic_launcher"
+                    android:src="@drawable/ic_launcher"
                     android:scaleType="centerCrop"
                     android:background="#E0E0E0"
                     android:padding="2dp"
@@ -69,7 +70,7 @@
                 android:drawableTint="#4CAF50"/>
         </LinearLayout>
 
-              <!-- WALLET SECTION -->
+        <!-- WALLET SECTION -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -118,7 +119,6 @@
                     android:backgroundTint="#4CAF50"
                     app:cornerRadius="8dp"/>
 
-                <!-- NEW BUTTON ADDED HERE -->
                 <Button
                     android:id="@+id/btn_withdraw_history"
                     android:layout_width="match_parent"

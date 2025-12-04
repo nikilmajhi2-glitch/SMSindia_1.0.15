@@ -1,108 +1,250 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FAFAFA">
+    android:background="#F8F9FA"
+    android:fillViewport="true">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:padding="20dp">
 
-        <!-- Status Card -->
-        <androidx.cardview.widget.CardView
-            android:id="@+id/status_card"
+        <!-- HEADER -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="SMS Task Automator"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:textColor="#212121"/>
+        
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Select a SIM card to start earning"
+            android:textSize="14sp"
+            android:textColor="#757575"
+            android:layout_marginBottom="20dp"/>
+
+        <!-- SIM SELECTION (Custom Cards) -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:cardCornerRadius="12dp"
-            android:layout_marginBottom="16dp"
-            app:cardElevation="4dp">
+            android:orientation="horizontal"
+            android:baselineAligned="false"
+            android:layout_marginBottom="24dp">
 
+            <!-- SIM 1 -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/card_sim_1"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginEnd="8dp"
+                android:clickable="true"
+                android:focusable="true"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="0dp"
+                app:strokeColor="#6200EE"
+                app:strokeWidth="2dp"
+                app:cardBackgroundColor="#E8EAF6">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp"
+                    android:gravity="center">
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_launcher_foreground"
+                        app:tint="#6200EE"/>
+                    <TextView
+                        android:id="@+id/tv_sim1_name"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="SIM 1"
+                        android:textStyle="bold"
+                        android:textColor="#6200EE"
+                        android:layout_marginTop="8dp"/>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- SIM 2 -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/card_sim_2"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="8dp"
+                android:clickable="true"
+                android:focusable="true"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="0dp"
+                app:strokeColor="#E0E0E0"
+                app:strokeWidth="1dp"
+                app:cardBackgroundColor="#FFFFFF">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp"
+                    android:gravity="center">
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_launcher_foreground"
+                        app:tint="#757575"/>
+                    <TextView
+                        android:id="@+id/tv_sim2_name"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="SIM 2"
+                        android:textStyle="bold"
+                        android:textColor="#757575"
+                        android:layout_marginTop="8dp"/>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+        </LinearLayout>
+
+        <!-- TIMER DASHBOARD -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="6dp"
+            app:cardBackgroundColor="#FFFFFF">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="30dp">
+
+                <!-- Circular Progress -->
+                <com.google.android.material.progressindicator.CircularProgressIndicator
+                    android:id="@+id/progress_timer_circle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    app:trackColor="#F0F0F0"
+                    app:indicatorColor="#6200EE"
+                    app:trackThickness="8dp"
+                    app:indicatorSize="140dp"
+                    android:progress="100"
+                    android:max="100"/>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:orientation="vertical"
+                    android:gravity="center">
+
+                    <TextView
+                        android:id="@+id/tv_timer"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="00"
+                        android:textSize="36sp"
+                        android:textStyle="bold"
+                        android:textColor="#212121"/>
+                    
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="SECONDS"
+                        android:textSize="10sp"
+                        android:letterSpacing="0.2"
+                        android:textColor="#9E9E9E"/>
+                </LinearLayout>
+            </RelativeLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- STATUS TEXT -->
+        <TextView
+            android:id="@+id/status_message"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Ready to Start"
+            android:gravity="center"
+            android:layout_marginTop="16dp"
+            android:textSize="16sp"
+            android:textColor="#555"/>
+
+        <!-- CONTROLS -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            app:cardBackgroundColor="#F5F5F5"
+            app:cardCornerRadius="8dp"
+            app:strokeColor="#E0E0E0"
+            app:strokeWidth="1dp">
+            
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="20dp">
-
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="12dp"
+                android:gravity="center_vertical">
+                
                 <TextView
-                    android:id="@+id/status_message"
-                    android:layout_width="match_parent"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:text="Ready to send SMS"
-                    android:textSize="18sp"
-                    android:textColor="#333333"
+                    android:layout_weight="1"
+                    android:text="Auto-Send Loop"
                     android:textStyle="bold"
-                    android:gravity="center"/>
+                    android:textColor="#424242"/>
+                
+                <com.google.android.material.switchmaterial.SwitchMaterial
+                    android:id="@+id/switch_auto_mode"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
             </LinearLayout>
-        </androidx.cardview.widget.CardView>
+        </com.google.android.material.card.MaterialCardView>
 
-        <TextView
-            android:id="@+id/tv_fetch_number"
+        <Button
+            android:id="@+id/btn_action_main"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Number: "
+            android:layout_height="60dp"
+            android:text="START TASK"
             android:textSize="16sp"
-            android:textColor="#333333"
-            android:layout_marginBottom="4dp"/>
+            android:textStyle="bold"
+            android:layout_marginTop="16dp"
+            app:cornerRadius="12dp"
+            android:backgroundTint="#6200EE"/>
 
+        <!-- TERMINAL LOGS -->
         <TextView
-            android:id="@+id/tv_fetch_message"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Content: "
-            android:textSize="16sp"
-            android:textColor="#333333"
-            android:layout_marginBottom="12dp"/>
+            android:text="Live Logs"
+            android:layout_marginTop="24dp"
+            android:textStyle="bold"
+            android:textColor="#757575"/>
 
-        <!-- Progress Bar for Sending -->
-        <ProgressBar
-            android:id="@+id/sending_progress"
-            style="?android:attr/progressBarStyleHorizontal"
+        <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="10dp"
-            android:visibility="gone"
-            android:layout_marginBottom="12dp"
-            android:progressTint="#4CAF50"/>
+            android:layout_height="150dp"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/bg_terminal"> <!-- We will create this drawable or just use color -->
+            
+            <TextView
+                android:id="@+id/tv_logs"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="12dp"
+                android:background="#212121"
+                android:text="> System initialized..."
+                android:textColor="#00E676"
+                android:fontFamily="monospace"
+                android:textSize="12sp"/>
+        </ScrollView>
 
-        <Button
-            android:id="@+id/btn_fetch_next"
-            android:layout_width="match_parent"
-            android:layout_height="45dp"
-            android:text="Fetch Next"
-            android:backgroundTint="#009688"
-            android:textColor="#FFF"
-            android:layout_marginBottom="8dp"/>
-
-        <Button
-            android:id="@+id/btn_send_single"
-            android:layout_width="match_parent"
-            android:layout_height="45dp"
-            android:text="Send SMS"
-            android:backgroundTint="#4CAF50"
-            android:textColor="#FFF"
-            android:layout_marginBottom="16dp"
-            android:enabled="true"/>
-
-        <!-- Help & Hint Message -->
-        <TextView
-            android:id="@+id/fail_hint"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text=""
-            android:textColor="#F44336"
-            android:visibility="gone"
-            android:textSize="14sp"
-            android:gravity="center"/>
-
-        <Button
-            android:id="@+id/btn_view_logs"
-            android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:text="View Logs"
-            android:textColor="#FFFFFF"
-            android:backgroundTint="#666666"
-            android:layout_marginTop="18dp" />
     </LinearLayout>
-</ScrollView>
+</androidx.core.widget.NestedScrollView>

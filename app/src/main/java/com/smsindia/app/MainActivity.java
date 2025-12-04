@@ -16,8 +16,8 @@ import androidx.fragment.app.Fragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.smsindia.app.ui.HomeFragment;
 import com.smsindia.app.ui.ProfileFragment;
-import com.smsindia.app.ui.ShareFragment; // ✅ Added
-import com.smsindia.app.ui.SpinFragment;  // ✅ Added
+import com.smsindia.app.ui.ShareFragment;
+import com.smsindia.app.ui.SpinFragment;
 import com.smsindia.app.ui.TaskFragment;
 
 public class MainActivity extends AppCompatActivity {
@@ -45,7 +45,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        navView = findViewById(R.id.bottomNavigationView);
+        
+        // ✅ FIXED ID: Matches activity_main.xml
+        navView = findViewById(R.id.bottom_navigation);
 
         // Check Login Status
         SharedPreferences prefs = getSharedPreferences("SMSINDIA_USER", MODE_PRIVATE);
@@ -63,20 +65,20 @@ public class MainActivity extends AppCompatActivity {
             loadFragment(new HomeFragment());
         }
 
-        // ✅ UPDATED NAVIGATION LOGIC
+        // ✅ UPDATED NAVIGATION LOGIC (Matches menu_bottom_nav.xml)
         navView.setOnItemSelectedListener(item -> {
             int id = item.getItemId();
             Fragment selectedFragment = null;
 
-            if (id == R.id.navigation_home) {
+            if (id == R.id.nav_home) {
                 selectedFragment = new HomeFragment();
-            } else if (id == R.id.navigation_spin) {
+            } else if (id == R.id.nav_spin) {
                 selectedFragment = new SpinFragment();
-            } else if (id == R.id.navigation_tasks) {
+            } else if (id == R.id.nav_task) {
                 selectedFragment = new TaskFragment();
-            } else if (id == R.id.navigation_share) {
+            } else if (id == R.id.nav_share) {
                 selectedFragment = new ShareFragment();
-            } else if (id == R.id.navigation_profile) {
+            } else if (id == R.id.nav_profile) {
                 selectedFragment = new ProfileFragment();
             }
 
@@ -105,7 +107,8 @@ public class MainActivity extends AppCompatActivity {
     private void loadFragment(Fragment fragment) {
         getSupportFragmentManager()
                 .beginTransaction()
-                .replace(R.id.fragment_container, fragment)
+                // ✅ FIXED ID: Matches activity_main.xml FrameLayout
+                .replace(R.id.nav_host_fragment, fragment)
                 .commitAllowingStateLoss();
     }
 }

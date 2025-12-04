@@ -1,0 +1,14 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="100dp"
+    android:height="100dp"
+    android:viewportWidth="192"
+    android:viewportHeight="192">
+    <!-- Blue Circle -->
+    <path
+        android:fillColor="@color/app_primary"
+        android:pathData="M96,16 a80,80 0 1,0 0,160 a80,80 0 1,0 0,-160"/>
+    <!-- White Inner -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M60,80 h72 q9,0 9,8 v30 q0,8 -9,8 h-54 l-12,12 v-12 h-6 q-9,0 -9,-8 v-30 q0,-8 9,-8 z"/>
+</vector>

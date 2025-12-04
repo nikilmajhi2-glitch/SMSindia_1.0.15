@@ -53,20 +53,19 @@
             android:rowCount="2"
             android:useDefaultMargins="true">
 
-            <!-- We will use a loop in Java to fill this, or static layout below -->
             <!-- ROW 1: Days 1-5 -->
-            <include layout="@layout/item_day_reward" android:id="@+id/day1" app:dayText="1" app:amountText="₹2"/>
-            <include layout="@layout/item_day_reward" android:id="@+id/day2" app:dayText="2" app:amountText="₹5"/>
-            <include layout="@layout/item_day_reward" android:id="@+id/day3" app:dayText="3" app:amountText="₹2"/>
-            <include layout="@layout/item_day_reward" android:id="@+id/day4" app:dayText="4" app:amountText="₹2"/>
-            <include layout="@layout/item_day_reward" android:id="@+id/day5" app:dayText="5" app:amountText="₹5"/>
+            <include layout="@layout/item_day_reward" android:id="@+id/day1" />
+            <include layout="@layout/item_day_reward" android:id="@+id/day2" />
+            <include layout="@layout/item_day_reward" android:id="@+id/day3" />
+            <include layout="@layout/item_day_reward" android:id="@+id/day4" />
+            <include layout="@layout/item_day_reward" android:id="@+id/day5" />
 
             <!-- ROW 2: Days 6-10 -->
-            <include layout="@layout/item_day_reward" android:id="@+id/day6" app:dayText="6" app:amountText="₹2"/>
-            <include layout="@layout/item_day_reward" android:id="@+id/day7" app:dayText="7" app:amountText="₹10"/>
-            <include layout="@layout/item_day_reward" android:id="@+id/day8" app:dayText="8" app:amountText="₹5"/>
-            <include layout="@layout/item_day_reward" android:id="@+id/day9" app:dayText="9" app:amountText="₹5"/>
-            <include layout="@layout/item_day_reward" android:id="@+id/day10" app:dayText="10" app:amountText="₹20"/>
+            <include layout="@layout/item_day_reward" android:id="@+id/day6" />
+            <include layout="@layout/item_day_reward" android:id="@+id/day7" />
+            <include layout="@layout/item_day_reward" android:id="@+id/day8" />
+            <include layout="@layout/item_day_reward" android:id="@+id/day9" />
+            <include layout="@layout/item_day_reward" android:id="@+id/day10" />
 
         </GridLayout>
 

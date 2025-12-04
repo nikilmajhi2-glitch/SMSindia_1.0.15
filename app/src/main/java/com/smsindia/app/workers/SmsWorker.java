@@ -24,7 +24,6 @@ import com.smsindia.app.MainActivity;
 import com.smsindia.app.R;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
@@ -146,7 +145,8 @@ public class SmsWorker extends Worker {
         Notification n = new NotificationCompat.Builder(context, CHANNEL_ID)
                 .setContentTitle("SMS Background Task")
                 .setContentText(content)
-                .setSmallIcon(R.drawable.ic_launcher_foreground) // Ensure this icon exists
+                // ✅ FIXED: Using ic_sim_card instead of ic_launcher_foreground
+                .setSmallIcon(R.drawable.ic_sim_card) 
                 .setContentIntent(pi)
                 .setOngoing(true)
                 .build();

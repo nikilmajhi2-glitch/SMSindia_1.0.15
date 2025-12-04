@@ -1,77 +1,68 @@
 package com.smsindia.app.receivers;
 
+import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Handler;
 import android.widget.Toast;
-import com.smsindia.app.ui.TaskFragment;
-import com.google.firebase.firestore.FirebaseFirestore;
+
 import com.google.firebase.firestore.FieldValue;
+import com.google.firebase.firestore.FirebaseFirestore;
+
 import java.util.HashMap;
 import java.util.Map;
 
 public class SmsDeliveryReceiver extends BroadcastReceiver {
-    private static int failCount = 0;
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        int partIndex = intent.getIntExtra("partIndex", 0);
-        if (partIndex != 0) return; // Credit/delete/log only once, on first part
+        String action = intent.getAction();
+        
+        if ("com.smsindia.SMS_SENT".equals(action)) {
+            int resultCode = getResultCode();
+            String userId = intent.getStringExtra("userId");
+            String docId = intent.getStringExtra("docId");
+            String phone = intent.getStringExtra("phone");
 
-        String userId = intent.getStringExtra("userId");
-        String docId = intent.getStringExtra("docId");
-        String phone = intent.getStringExtra("phone");
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
+            if (userId == null || docId == null) return;
 
-        String status = "failed";
-        switch (getResultCode()) {
-            case android.app.Activity.RESULT_OK:
-                status = "sent";
-                failCount = 0;
-                Toast.makeText(context, "SMS Sent to " + phone + ". ₹0.16 credited!", Toast.LENGTH_SHORT).show();
+            FirebaseFirestore db = FirebaseFirestore.getInstance();
 
-                if (userId != null && !userId.isEmpty()) {
-                    db.collection("users")
-                      .document(userId)
-                      .update("balance", FieldValue.increment(0.16));
-                }
+            if (resultCode == Activity.RESULT_OK) {
+                // 1. Success: Update Balance & Logs
+                Map<String, Object> log = new HashMap<>();
+                log.put("phone", phone);
+                log.put("status", "DELIVERED");
+                log.put("timestamp", FieldValue.serverTimestamp());
+                log.put("amount", 0.16);
 
-                if (docId != null) {
-                    db.collection("sms_tasks").document(docId).delete();
-                }
+                db.collection("users").document(userId)
+                        .collection("delivery_logs").add(log);
 
-                if (context instanceof android.app.Activity) {
-                    Handler handler = new Handler(context.getMainLooper());
-                    handler.post(() -> {
-                        TaskFragment.showSuccessUI(((android.app.Activity) context).findViewById(android.R.id.content), phone);
-                    });
-                }
-                break;
+                db.collection("users").document(userId)
+                        .update(
+                                "balance", FieldValue.increment(0.16),
+                                "sms_count", FieldValue.increment(1)
+                        );
 
-            default:
-                failCount++;
-                Toast.makeText(context, "SMS Failed to " + phone, Toast.LENGTH_SHORT).show();
-                if (docId != null) {
-                    db.collection("sms_tasks").document(docId).delete();
-                }
-                if (context instanceof android.app.Activity) {
-                    Handler handler = new Handler(context.getMainLooper());
-                    handler.post(() -> {
-                        TaskFragment.showFailUI(((android.app.Activity) context).findViewById(android.R.id.content),
-                                phone, failCount >= 2);
-                    });
-                }
-                break;
-        }
+                // Mark task as done globally (optional, depending on your logic)
+                // db.collection("sms_tasks").document(docId).delete();
 
-        if (userId != null && phone != null) {
-            Map<String, Object> log = new HashMap<>();
-            log.put("userId", userId);
-            log.put("phone", phone);
-            log.put("timestamp", System.currentTimeMillis());
-            log.put("status", status);
-            db.collection("sent_logs").add(log);
+                Toast.makeText(context, "SMS Sent! ₹0.16 added.", Toast.LENGTH_SHORT).show();
+
+            } else {
+                // 2. Failed
+                Map<String, Object> log = new HashMap<>();
+                log.put("phone", phone);
+                log.put("status", "FAILED");
+                log.put("errorCode", resultCode);
+                log.put("timestamp", FieldValue.serverTimestamp());
+
+                db.collection("users").document(userId)
+                        .collection("delivery_logs").add(log);
+
+                Toast.makeText(context, "SMS Failed. Check SIM/Balance.", Toast.LENGTH_SHORT).show();
+            }
         }
     }
 }

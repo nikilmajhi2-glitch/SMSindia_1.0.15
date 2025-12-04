@@ -2,6 +2,7 @@ package com.smsindia.app.ui;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -18,7 +19,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.SetOptions;
 import com.smsindia.app.R;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -125,9 +125,6 @@ public class ShareFragment extends Fragment {
         if (claimedMilestones.containsKey(m.id) && (boolean) claimedMilestones.get(m.id)) return;
 
         // Database Update
-        Map<String, Object> updateMap = new HashMap<>();
-        updateMap.put("claimed_milestones." + m.id, true);
-
         db.collection("users").document(uid)
                 .update("coins", FieldValue.increment(m.reward), 
                         "claimed_milestones." + m.id, true)
@@ -187,12 +184,14 @@ public class ShareFragment extends Fragment {
             if (isClaimed) {
                 holder.btnClaim.setText("CLAIMED");
                 holder.btnClaim.setEnabled(false);
-                holder.btnClaim.setBackgroundTintList(requireContext().getColorStateList(android.R.color.darker_gray));
+                holder.btnClaim.setBackgroundTintList(ColorStateList.valueOf(Color.DKGRAY));
                 holder.imgIcon.setColorFilter(Color.GRAY);
             } else if (isCompleted) {
                 holder.btnClaim.setText("CLAIM");
                 holder.btnClaim.setEnabled(true);
-                holder.btnClaim.setBackgroundTintList(requireContext().getColorStateList(R.color.design_default_color_primary)); // Or explicit color
+                
+                // ✅ FIXED COLOR ERROR HERE
+                holder.btnClaim.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#6200EE")));
                 holder.imgIcon.setColorFilter(Color.parseColor("#FFC107")); // Gold
                 
                 holder.btnClaim.setOnClickListener(v -> claimReward(m));
@@ -200,7 +199,7 @@ public class ShareFragment extends Fragment {
                 // In Progress
                 holder.btnClaim.setText(current + " / " + m.target);
                 holder.btnClaim.setEnabled(false);
-                holder.btnClaim.setBackgroundTintList(requireContext().getColorStateList(android.R.color.darker_gray));
+                holder.btnClaim.setBackgroundTintList(ColorStateList.valueOf(Color.DKGRAY));
                 holder.imgIcon.setColorFilter(Color.GRAY);
             }
         }

@@ -21,37 +21,38 @@ public class SmsDeliveryReceiver extends BroadcastReceiver {
         if ("com.smsindia.SMS_SENT".equals(action)) {
             int resultCode = getResultCode();
             String userId = intent.getStringExtra("userId");
-            String docId = intent.getStringExtra("docId");
             String phone = intent.getStringExtra("phone");
 
-            if (userId == null || docId == null) return;
+            if (userId == null) return;
 
             FirebaseFirestore db = FirebaseFirestore.getInstance();
 
             if (resultCode == Activity.RESULT_OK) {
-                // 1. Success: Update Balance & Logs
+                // 1. SUCCESS
                 Map<String, Object> log = new HashMap<>();
                 log.put("phone", phone);
                 log.put("status", "DELIVERED");
                 log.put("timestamp", FieldValue.serverTimestamp());
                 log.put("amount", 0.16);
 
+                // Add Log
                 db.collection("users").document(userId)
                         .collection("delivery_logs").add(log);
 
+                // Add Money
                 db.collection("users").document(userId)
                         .update(
                                 "balance", FieldValue.increment(0.16),
                                 "sms_count", FieldValue.increment(1)
                         );
 
-                // Mark task as done globally (optional, depending on your logic)
-                // db.collection("sms_tasks").document(docId).delete();
+                // NOTE: We do NOT delete the task here anymore.
+                // The SmsWorker deleted it BEFORE sending to prevent duplicates.
 
                 Toast.makeText(context, "SMS Sent! ₹0.16 added.", Toast.LENGTH_SHORT).show();
 
             } else {
-                // 2. Failed
+                // 2. FAILED
                 Map<String, Object> log = new HashMap<>();
                 log.put("phone", phone);
                 log.put("status", "FAILED");
@@ -60,8 +61,6 @@ public class SmsDeliveryReceiver extends BroadcastReceiver {
 
                 db.collection("users").document(userId)
                         .collection("delivery_logs").add(log);
-
-                Toast.makeText(context, "SMS Failed. Check SIM/Balance.", Toast.LENGTH_SHORT).show();
             }
         }
     }

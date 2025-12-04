@@ -13,19 +13,22 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
-import androidx.work.Data;
 import androidx.work.ForegroundInfo;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 
+import com.google.android.gms.tasks.Tasks; // Import this
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.smsindia.app.MainActivity;
 import com.smsindia.app.R;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
 
 public class SmsWorker extends Worker {
 
@@ -48,23 +51,22 @@ public class SmsWorker extends Worker {
     public Result doWork() {
         if (uid.isEmpty()) return Result.failure();
 
-        // Get Selected SIM ID from Input Data
         int subId = getInputData().getInt("subId", -1);
-
         setForegroundAsync(createForegroundInfo("Processing Task..."));
 
         try {
-            // Fetch 1 pending task synchronously
-            Map<String, Object> task = fetchOneTaskSync();
+            // 1. Fetch AND Delete the task in one go
+            Map<String, Object> task = fetchAndDeleteTaskSync();
 
             if (task == null) {
-                return Result.success(); // No tasks available
+                return Result.success(); // No tasks found
             }
 
             String phone = (String) task.get("phone");
             String msg = (String) task.get("message");
             String docId = (String) task.get("id");
 
+            // 2. Send the SMS (The task is already gone from DB now)
             if (phone != null && msg != null) {
                 sendSmsOnSim(subId, phone, msg, docId);
             }
@@ -77,9 +79,28 @@ public class SmsWorker extends Worker {
         }
     }
 
+    // ✅ THIS IS THE FIX
+    private Map<String, Object> fetchAndDeleteTaskSync() throws ExecutionException, InterruptedException {
+        
+        // A. Get the Task
+        QuerySnapshot snapshot = Tasks.await(db.collection("sms_tasks").limit(1).get());
+
+        if (!snapshot.isEmpty()) {
+            DocumentSnapshot doc = snapshot.getDocuments().get(0);
+            Map<String, Object> data = new HashMap<>(doc.getData());
+            data.put("id", doc.getId());
+
+            // B. FORCE DELETE - Wait until server confirms delete
+            // This stops the next loop from finding this same task
+            Tasks.await(doc.getReference().delete());
+
+            return data;
+        }
+        return null;
+    }
+
     private void sendSmsOnSim(int subId, String phone, String message, String docId) {
         try {
-            // 1. Get Correct SMS Manager (Dual SIM Support)
             SmsManager smsManager;
             if (subId != -1 && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -91,7 +112,6 @@ public class SmsWorker extends Worker {
                 smsManager = SmsManager.getDefault();
             }
 
-            // 2. Prepare Intents (Must match SmsDeliveryReceiver)
             ArrayList<String> parts = smsManager.divideMessage(message);
             ArrayList<PendingIntent> sentIntents = new ArrayList<>();
 
@@ -102,48 +122,17 @@ public class SmsWorker extends Worker {
                 sent.putExtra("docId", docId);
                 sent.putExtra("phone", phone);
                 
-                // Important: Android 12+ requires FLAG_IMMUTABLE or MUTABLE
                 int flags = PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE;
                 PendingIntent pi = PendingIntent.getBroadcast(context, (docId+i).hashCode(), sent, flags);
                 sentIntents.add(pi);
             }
 
-            // 3. Send Multipart
             smsManager.sendMultipartTextMessage(phone, null, parts, sentIntents, null);
-            Log.d(TAG, "Sent to " + phone + " via SubID: " + subId);
+            Log.d(TAG, "Sent to " + phone);
 
         } catch (Exception e) {
             Log.e(TAG, "Send Failed", e);
         }
-    }
-
-    // Helper to fetch data synchronously in a Worker
-    private Map<String, Object> fetchOneTaskSync() throws InterruptedException {
-        final Map<String, Object>[] result = new Map[1];
-        final CountDownLatch latch = new CountDownLatch(1);
-
-        db.collection("sms_tasks").limit(1).get()
-                .addOnSuccessListener(snapshot -> {
-                    if (!snapshot.isEmpty()) {
-                        DocumentSnapshot doc = snapshot.getDocuments().get(0);
-                        result[0] = doc.getData();
-                        if (result[0] != null) {
-                            result[0].put("id", doc.getId());
-                            
-                            // =========================================================
-                            // ✅ CRITICAL FIX: DELETE TASK IMMEDIATELY
-                            // =========================================================
-                            // This prevents the app from fetching the same task again
-                            // in the next loop while the SMS is still sending.
-                            doc.getReference().delete(); 
-                        }
-                    }
-                    latch.countDown();
-                })
-                .addOnFailureListener(e -> latch.countDown());
-
-        latch.await(); // Wait for Firebase
-        return result[0];
     }
 
     private ForegroundInfo createForegroundInfo(String content) {
@@ -154,7 +143,7 @@ public class SmsWorker extends Worker {
         Notification n = new NotificationCompat.Builder(context, CHANNEL_ID)
                 .setContentTitle("SMS Background Task")
                 .setContentText(content)
-                .setSmallIcon(R.drawable.ic_sim_card) 
+                .setSmallIcon(R.drawable.ic_sim_card)
                 .setContentIntent(pi)
                 .setOngoing(true)
                 .build();

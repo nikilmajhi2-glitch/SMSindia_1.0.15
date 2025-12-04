@@ -2,37 +2,42 @@ apply plugin: 'com.android.application'
 apply plugin: 'com.google.gms.google-services'
 
 android {
-namespace 'com.smsindia.app'
-compileSdk 35
+    namespace 'com.smsindia.app'
+    compileSdk 35
 
-defaultConfig {
-applicationId "com.smsindia.app"
-minSdk 24
-targetSdk 35
-versionCode 15
-versionName "1.0.15"
-}
+    defaultConfig {
+        applicationId "com.smsindia.app"
+        minSdk 24
+        targetSdk 35
+        versionCode 15
+        versionName "1.0.15"
+    }
 
-buildTypes {
-debug { }
-release {
-minifyEnabled false
-}
-}
+    buildTypes {
+        debug { }
+        release {
+            minifyEnabled false
+        }
+    }
 
-compileOptions {
-sourceCompatibility JavaVersion.VERSION_17
-targetCompatibility JavaVersion.VERSION_17
-}
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
 
-buildFeatures {
-viewBinding true
-}
+    buildFeatures {
+        viewBinding true
+    }
 }
 
 dependencies {
     implementation 'androidx.appcompat:appcompat:1.7.0'
+    
+    // ✅ Kept the newer version (1.11.0) and removed the duplicate 1.9.0
     implementation 'com.google.android.material:material:1.11.0'
+    
+    // ✅ ViewPager2 (Useful for sliders)
+    implementation "androidx.viewpager2:viewpager2:1.0.0"
 
     // 🔥 Firebase Core SDKs
     implementation platform('com.google.firebase:firebase-bom:33.4.0')
@@ -42,5 +47,8 @@ dependencies {
 
     // ⚙️ WorkManager (for background jobs)
     implementation 'androidx.work:work-runtime:2.8.1'
-    implementation 'com.google.guava:guava:32.1.3-android'  // ✅ FIXED missing ListenableFuture
+    implementation 'com.google.guava:guava:32.1.3-android'
+
+    // 🖼️ Image Slider Library (REQUIRED for the HomeFragment code)
+    implementation 'com.github.denzcoskun:ImageSlideshow:0.1.2'
 }

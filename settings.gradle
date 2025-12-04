@@ -1,2 +1,21 @@
+pluginManagement {
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+        
+        // 👇 THIS IS REQUIRED for the Image Slider library
+        maven { url 'https://jitpack.io' } 
+    }
+}
+
 rootProject.name = 'SMSIndia_project'
 include ':app'

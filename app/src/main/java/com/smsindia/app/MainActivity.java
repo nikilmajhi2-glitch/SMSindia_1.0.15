@@ -1,12 +1,11 @@
 package com.smsindia.app;
-
+import com.smsindia.app.ui.LoginActivity; // <--- ADD THIS LINE
 import android.Manifest;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.widget.Toast;
-
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;

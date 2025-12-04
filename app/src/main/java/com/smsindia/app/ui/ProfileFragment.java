@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.res.ColorStateList; // Added Import
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -26,14 +25,15 @@ import android.widget.Toast;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
-import com.google.android.material.card.MaterialCardView;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.WriteBatch;
 import com.smsindia.app.R;
+import com.smsindia.app.ui.WithdrawalHistoryActivity; // Ensure you create this Activity later
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
@@ -102,8 +102,8 @@ public class ProfileFragment extends Fragment {
         btnWithdraw.setOnClickListener(view -> requestWithdrawal());
 
         btnHistory.setOnClickListener(view -> {
-            Intent intent = new Intent(getActivity(), WithdrawalHistoryActivity.class);
-            startActivity(intent);
+             Intent intent = new Intent(getActivity(), WithdrawalHistoryActivity.class);
+             startActivity(intent);
         });
 
         return v;
@@ -144,6 +144,8 @@ public class ProfileFragment extends Fragment {
         View view = LayoutInflater.from(getContext()).inflate(R.layout.dialog_add_bank, null);
         builder.setView(view);
         AlertDialog dialog = builder.create();
+        
+        if (dialog.getWindow() != null) dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
 
         EditText etName = view.findViewById(R.id.et_bank_name);
         EditText etAc = view.findViewById(R.id.et_bank_ac);
@@ -187,7 +189,64 @@ public class ProfileFragment extends Fragment {
         showAmountSelectionDialog();
     }
 
-    
+    private void showAmountSelectionDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        // We need to create this layout file (dialog_withdraw.xml)
+        View view = LayoutInflater.from(getContext()).inflate(R.layout.dialog_withdraw, null);
+        builder.setView(view);
+        AlertDialog dialog = builder.create();
+        if (dialog.getWindow() != null) dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+
+        GridLayout gridLayout = view.findViewById(R.id.grid_amounts);
+        Button btnConfirm = view.findViewById(R.id.btn_confirm_withdraw);
+        selectedAmount = 0; // Reset
+
+        // Dynamically add buttons to grid
+        for (int amount : WITHDRAWAL_OPTIONS) {
+            Button btn = new Button(getContext());
+            btn.setText("₹" + amount);
+            btn.setBackgroundTintList(ContextCompat.getColorStateList(requireContext(), R.color.gray_bg));
+            btn.setTextColor(Color.BLACK);
+            
+            GridLayout.LayoutParams params = new GridLayout.LayoutParams();
+            params.width = 0;
+            params.height = GridLayout.LayoutParams.WRAP_CONTENT;
+            params.columnSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f);
+            params.setMargins(10, 10, 10, 10);
+            btn.setLayoutParams(params);
+
+            btn.setOnClickListener(v -> {
+                selectedAmount = amount;
+                // Visual Feedback: Reset all buttons, highlight selected
+                for (int i = 0; i < gridLayout.getChildCount(); i++) {
+                    View child = gridLayout.getChildAt(i);
+                    if (child instanceof Button) {
+                        child.setBackgroundTintList(ContextCompat.getColorStateList(requireContext(), R.color.gray_bg));
+                        ((Button) child).setTextColor(Color.BLACK);
+                    }
+                }
+                btn.setBackgroundTintList(ContextCompat.getColorStateList(requireContext(), R.color.app_primary));
+                btn.setTextColor(Color.WHITE);
+            });
+
+            gridLayout.addView(btn);
+        }
+
+        btnConfirm.setOnClickListener(v -> {
+            if (selectedAmount == 0) {
+                Toast.makeText(getContext(), "Select an amount", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if (currentBalance < selectedAmount) {
+                Toast.makeText(getContext(), "Insufficient Balance!", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            processWithdrawal(selectedAmount, dialog);
+        });
+
+        dialog.show();
+    }
+
     private void processWithdrawal(int amount, AlertDialog parentDialog) {
         WriteBatch batch = db.batch();
         DocumentReference userRef = db.collection("users").document(uid);
@@ -214,7 +273,7 @@ public class ProfileFragment extends Fragment {
 
         batch.commit().addOnSuccessListener(a -> {
             parentDialog.dismiss();
-            showSuccessPopup(); // Show success message
+            showSuccessPopup();
         }).addOnFailureListener(e -> {
             Toast.makeText(getContext(), "Failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         });

@@ -109,7 +109,7 @@ public class HomeFragment extends Fragment {
             });
     }
 
-        private void launchDialogUI(int currentDay, boolean canClaim, String todayDate) {
+            private void launchDialogUI(int currentDay, boolean canClaim, String todayDate) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
         View view = LayoutInflater.from(getContext()).inflate(R.layout.dialog_daily_checkin, null);
         builder.setView(view);
@@ -118,12 +118,11 @@ public class HomeFragment extends Fragment {
 
         TextView tvStreak = view.findViewById(R.id.tv_streak_status);
         Button btnClaim = view.findViewById(R.id.btn_claim_reward);
-        View btnClose = view.findViewById(R.id.btn_close_dialog); // Changed to View/TextView
+        View btnClose = view.findViewById(R.id.btn_close_dialog); 
 
         tvStreak.setText("Current Streak: Day " + currentDay);
 
         // --- UPDATE GRID VISUALS ---
-        // We iterate through IDs day1 to day10 to set texts and highlight current day
         int[] viewIds = {
             R.id.day1, R.id.day2, R.id.day3, R.id.day4, R.id.day5,
             R.id.day6, R.id.day7, R.id.day8, R.id.day9, R.id.day10
@@ -135,25 +134,24 @@ public class HomeFragment extends Fragment {
             
             TextView lblDay = dayView.findViewById(R.id.lbl_day);
             TextView lblAmount = dayView.findViewById(R.id.lbl_amount);
-            View bgCircle = dayView.findViewById(R.id.lbl_amount).getParent(); // The FrameLayout
+            
+            // FIX IS HERE: Added (View) cast
+            View bgCircle = (View) dayView.findViewById(R.id.lbl_amount).getParent(); 
             
             lblDay.setText("Day " + dayNum);
             lblAmount.setText("₹" + DAILY_REWARDS[i]);
 
             // Styling Logic
             if (dayNum < currentDay) {
-                // PAST DAYS (Already Claimed)
+                // PAST DAYS
                 dayView.setAlpha(0.5f); 
-                // Ideally show a checkmark here if you added the ImageView to layout
             } else if (dayNum == currentDay) {
                 // TODAY (Active)
-                bgCircle.requestLayout(); // Refresh
-                // Make it look selected (e.g., border color change logic could go here)
+                bgCircle.requestLayout(); 
                 lblDay.setTextColor(Color.parseColor("#6200EE"));
                 lblDay.setTypeface(null, android.graphics.Typeface.BOLD);
             } else {
                 // FUTURE DAYS
-                // Default look
             }
         }
         // ---------------------------
@@ -173,7 +171,6 @@ public class HomeFragment extends Fragment {
         btnClose.setOnClickListener(v -> dialog.dismiss());
         dialog.show();
     }
-
 
     private void claimReward(int day, int amount, String todayDate, AlertDialog dialog) {
         WriteBatch batch = db.batch();
